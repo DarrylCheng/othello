@@ -16,6 +16,8 @@ Phone: 012-737-0538
 #include <fstream>
 #include <cctype> //isalpha()
 using namespace std;
+#include <algorithm>
+//Test Changes
 
 #define cls (system("cls")) //Clear screen
 #define arrow (cout << "==> ") 
