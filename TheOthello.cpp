@@ -16,8 +16,6 @@ Phone: 012-737-0538
 #include <fstream>
 #include <cctype> //isalpha()
 using namespace std;
-#include <algorithm>
-//Test Changes
 
 #define cls (system("cls")) //Clear screen
 #define arrow (cout << "==> ") 
@@ -35,11 +33,12 @@ int column(int);
 
 bool player = true; //True for player X, false for player Y. Default first player will be X.
 string line(50, '-');
-string newgame("1. New Game"),help("2. Help"),quit("3. Quit");
+string selections = "1. New Game\n2. Load a game\n3. Help\n4. Quit\n\n";
 string gameboard(" |---+---+---+---+---+---+---+---|\n");
 string menu_commands, game_commands;
 bool done = false;
-char board[8][8] = {' '}; //Initialize (Multidimensional Array) Serves as the game board on screen.
+string readsavedata;
+char board[8][8]; //Initialize (Multidimensional Array) Serves as the game board on screen.
 int totalscore=0; //If totalscore is 64 which is all the possible input spaces available, means the game has ended.
 
 int main() //Main function
@@ -52,8 +51,8 @@ void menu() //Start up screen
 {
 	cls; 
 	banner;
-	cout << "Choose the following selections\n\n";
-	cout << newgame << endl << help << endl << quit << endl << endl;
+	cout << "Choose the following selections\nType the number or the whole text\n\n";
+	cout << selections;
 	arrow;
 	getline(cin, menu_commands);
 	for(int i=0; i< menu_commands.length(); i++) {
@@ -65,10 +64,24 @@ void menu() //Start up screen
 		done = false;
 		game();
 	}
-	else if (menu_commands == "2" || menu_commands == "HELP"){
+	else if (menu_commands == "2" || menu_commands == "LOAD A GAME"){
+		ifstream read;
+		read.open("a.txt");
+		getline(read,readsavedata);
+		stringstream sss(readsavedata);
+		read.close();
+		for(int X=0;X<8;X++){
+			for(int Y=0;Y<8;Y++){
+
+				sss >> board[X][Y];
+			}
+		}
+		game();
+	}
+	else if (menu_commands == "3" || menu_commands == "HELP"){
 		helpPage(); //Display help page
 	}
-	else if (menu_commands == "3" || menu_commands == "QUIT"){
+	else if (menu_commands == "4" || menu_commands == "QUIT"){
 		cout << "Good bye!"; 
 		//Back to main()
 	}
@@ -131,9 +144,18 @@ void ingame_commands(){ //GET user input in game
 				player = true; //True for player X.
 			}
 			game();
-		}
-		else  //coordinates NEED WORK FOR ERROR HANDLING!
-		{
+		} 
+		else if (game_commands == "SAVE"){
+			ofstream savegame;
+			savegame.open("a.txt");
+			for(int X=0;X<8;X++){
+				for(int Y=0;Y<8;Y++){
+					savegame << board[X][Y];
+				}
+			}
+			savegame.close();
+			game();
+		} else {
 			istringstream seperate(game_commands); //Seperate input into char and int 
 			char alphabet;
 			int num;
