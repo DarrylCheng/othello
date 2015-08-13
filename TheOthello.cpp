@@ -67,15 +67,13 @@ void menu() //Start up screen
 	else if (menu_commands == "2" || menu_commands == "LOAD A GAME"){
 		ifstream read;
 		read.open("a.txt");
-		getline(read,readsavedata);
-		stringstream sss(readsavedata);
-		read.close();
 		for(int X=0;X<8;X++){
 			for(int Y=0;Y<8;Y++){
 
-				sss >> board[X][Y];
+				read.get(board[X][Y]);
 			}
 		}
+		read.close();
 		game();
 	}
 	else if (menu_commands == "3" || menu_commands == "HELP"){
