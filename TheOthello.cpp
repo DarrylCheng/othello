@@ -26,6 +26,7 @@ using namespace std;
 void menu();
 void game();
 void ingame_commands();
+void validateMove(int,int);
 void helpPage(); 
 void displayStatus(); //Display score and current player
 int row(char);
@@ -37,7 +38,6 @@ string selections = "1. New Game\n2. Load a game\n3. Help\n4. Quit\n\n";
 string gameboard(" |---+---+---+---+---+---+---+---|\n");
 string menu_commands, game_commands;
 bool done = false;
-string readsavedata;
 char board[8][8]; //Initialize (Multidimensional Array) Serves as the game board on screen.
 int totalscore=0; //If totalscore is 64 which is all the possible input spaces available, means the game has ended.
 
@@ -73,6 +73,7 @@ void menu() //Start up screen
 				read.get(board[X][Y]);
 			}
 		}
+		read >> player;
 		read.close();
 		game();
 	}
@@ -81,6 +82,7 @@ void menu() //Start up screen
 	}
 	else if (menu_commands == "4" || menu_commands == "QUIT"){
 		cout << "Good bye!"; 
+		return;
 		//Back to main()
 	}
 	else {
@@ -108,8 +110,10 @@ void game(){ //Draws the game board
 	cout << "   a   b   c   d   e   f   g   h"; //Horizontal alphabets below the game board
 	displayStatus(); //Display score and player turn
 	//totalscore's value is from displayStatus()
+
 	if(!done){
 		ingame_commands();
+		return;
 	} else {
 		totalscore = 0; //Resets the game (Refer in displayStatus())
 		player = true; //Re initialize player back to true.
@@ -151,31 +155,27 @@ void ingame_commands(){ //GET user input in game
 					savegame << board[X][Y];
 				}
 			}
+			savegame << player;
 			savegame.close();
 			game();
 		} else {
 			istringstream seperate(game_commands); //Seperate input into char and int 
-			char alphabet;
-			int num;
-			seperate >> alphabet >> num;
-			if(!(seperate.fail()) && (isalpha(alphabet) && !isalpha(num))) //Any errors in seperating, for instance a character is assigned to num which is a integer variable.
+			char alpha;
+			int num,alphabet;
+			seperate >> alpha >> num;
+			if(!(seperate.fail()) && (isalpha(alpha) && !isalpha(num))) //Any errors in seperating, for instance a character is assigned to num which is a integer variable.
 			{	
-				alphabet = row(alphabet); //Convert them into array readable numbers, since user input (F,5) are (5,3) in terms of array positions.
+				alphabet = row(alpha); //Convert them into array readable numbers, since user input (F,5) are (5,3) in terms of array positions.
 				num = column(num); //Same as above
 				if (!(alphabet == 10 || num == 10) && !(board[num][alphabet]=='X' || board[num][alphabet]=='O'))  //If returned number 10, means one of the inputs are false.
 				{
-					if (player == true){ //X
-						SymbolX(num, alphabet);
-						player = false;									
-					} 
-					else{ //O
-						SymbolO(num, alphabet);
-						player = true;
-					}
-						game();
+					validateMove(alphabet, num);
+					game();
+					return;
 				} else {
 					cout << "\a"; //Beep sound indicates invalid input
 					game();
+					return;
 				}
 			} else {
 				cout << "\a"; //Beep sound indicates invalid input
@@ -185,6 +185,18 @@ void ingame_commands(){ //GET user input in game
 	}	
 }
 
+void validateMove(int right, int left){
+	int largest = right;
+	if (player == true){ //X
+		SymbolX(left, right);
+		player = false;									
+	} 
+	else{ //O
+		SymbolO(left, right);
+		player = true;
+	}
+	return;
+}
 void displayStatus() //Display player score and turn.
 {
 	int scoreX=0,scoreO=0;
@@ -223,7 +235,7 @@ void displayStatus() //Display player score and turn.
 			cout << "Winner is player O!\n";
 		}
 		system("pause");
-		for (int i=0;i<=7;i++) //For loop used to reset/re-initialize all array back to 0
+		for (int i=0;i<=7;i++) //For loop used to reset/re-initialize all array
 		{
 			for(int j=0;j<=7;j++){
 				board[i][j] = ' ';
