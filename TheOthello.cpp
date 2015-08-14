@@ -29,8 +29,7 @@ void ingame_commands();
 void validateMove(int,int);
 void helpPage(); 
 void displayStatus(); //Display score and current player
-int row(char);
-int column(int);
+void convertIndex(char&, int&);
 
 bool player = true; //True for player X, false for player Y. Default first player will be X.
 string line(50, '-');
@@ -161,27 +160,17 @@ void ingame_commands(){ //GET user input in game
 		} else {
 			istringstream seperate(game_commands); //Seperate input into char and int 
 			char alpha;
-			int num,alphabet;
+			int num;
 			seperate >> alpha >> num;
-			if(!(seperate.fail()) && (isalpha(alpha) && !isalpha(num))) //Any errors in seperating, for instance a character is assigned to num which is a integer variable.
-			{	
-				alphabet = row(alpha); //Convert them into array readable numbers, since user input (F,5) are (5,3) in terms of array positions.
-				num = column(num); //Same as above
-				if (!(alphabet == 10 || num == 10) && !(board[num][alphabet]=='X' || board[num][alphabet]=='O'))  //If returned number 10, means one of the inputs are false.
-				{
-					validateMove(alphabet, num);
-					game();
-					return;
-				} else {
-					cout << "\a"; //Beep sound indicates invalid input
-					game();
-					return;
-				}
+			convertIndex(alpha,num);
+			if (!(alpha == 10 || num == 10) && !(board[num][alpha]=='X' || board[num][alpha]=='O')){  //If returned number 10, means one of the inputs are false.
+				validateMove(alpha, num);
+				game();
 			} else {
 				cout << "\a"; //Beep sound indicates invalid input
 				game();
-			} //game() function are called to re-draw the game board with the necessary changes by user input	
-		}
+			}
+}  //game() function are called to re-draw the game board with the necessary changes by user input	
 	}	
 }
 
@@ -258,22 +247,19 @@ void helpPage() //Game instructions
 	menu(); //Back to menu()
 }
 
-int row(char x) //Convert them into array readable numbers, since user input (F,5) are (5,3) in terms of array positions.
+void convertIndex(char& alpha, int& num) //Convert them into array readable numbers, since user input (F,5) are (5,3) in terms of array positions.
 {
-	if (x>= 65 && x<=72){ //ASCII
-		return x-65;
+	if (alpha>= 65 && alpha<=72){ //ASCII
+		alpha -= 65;
 	} else {
-		return 10; //Return as error
+		alpha = 10; //Return as error
 	}
-}
 
-int column(int num) //Convert them into array readable numbers, since user input (F,5) are (5,3) in terms of array positions.
-{
 	static int numbers[8] = {7,6,5,4,3,2,1,0};
 	if (num>0 && num<9)
 	{
-		return numbers[num-1];
+		num =  numbers[num-1];
 	} else {
-		return 10; //Return as error
+		num = 10; //Return as error
 	}
 }
