@@ -20,7 +20,7 @@ using namespace std;
 #define arrow (cout << "==> ") 
 #define SymbolO(x,y) board[x][y]='O' //Input symbol O on the board
 #define SymbolX(x,y) board[x][y]='X' //Input symbol X on the board
-#define banner cout << line << "\n|" << setw(30) << right << "Othello: The Game"  << setw(20) << "|\n" << line << endl; //Game banner
+#define banner cout << line << "\n|" << setw(35) << right << "Super Othello: The Game"  << setw(15) << "|\n" << line << endl; //Game banner
 
 void menu();
 void game();
@@ -31,9 +31,59 @@ void displayStatus(); //Display score and current player
 void convertIndex(char&, int&);
 
 bool player = true, invalid=false,done=false; //True for player X, false for player Y. Default first player will be X.
+bool super1,super2,super3;
 string line(50, '-');
 char board[8][8]; //Initialize (Multidimensional Array) Serves as the game board on screen.
 int totalscore=0; //If totalscore is 64 which is all the possible input spaces available, means the game has ended.
+
+class SPower{
+public:
+	bool super1,super2,super3;
+	int count1,count2,count3;
+	void init(){
+		count1 = 0, count2 = 0,count3 = 0;
+		super1 = false,super2 = false,super3 = false;
+	}
+	void S1(){
+		if (count1>0){
+			cout << "\a";
+		}
+		if (count1==0){
+			super1 = true;
+			count1=1;
+		} 
+	}
+	void S2(){
+		if (count2>0){
+			cout << "\a";
+		}
+		if (count2==0){
+			super2 = true;
+			count2=1;
+		} 
+	}
+	void S3(){
+		if(count3>0){
+			cout << "\a";
+		}
+		if (count3==0){
+			super3 = true;
+			count3=1;
+		} 		
+	}
+	void powerdescription(){
+		if(super1){
+			cout << "   (Super power 1! You can place ANYWHERE you like!)";
+		} else if (super2){
+			cout << "   (Super power 2!)";
+		} else if (super3) {
+			cout << "   (Super power 3!)";
+		}	
+	}
+};
+
+SPower X;
+SPower O;
 
 int main() //Main function
 {
@@ -45,7 +95,9 @@ void menu() //Start up screen
 {
 	static string selections = "1. New Game\n2. Load a game\n3. Help\n4. Quit\n\n";
 	string menu_commands;
-	bool menu=true;
+	X.init();
+	O.init();
+	bool menu=true,super1=false,super2=false,super3=false;
 	for (int i=0;i<=7;i++){ //For loop used to reset/re-initialize all array
 		for(int j=0;j<=7;j++){
 			board[i][j] = ' ';
@@ -126,6 +178,8 @@ void game(){ //Draws the game board
 
 void ingame_commands(){ //GET user input in game
 	string game_commands;
+	X.powerdescription();
+	O.powerdescription();
 	cout << endl;
 	arrow;
 	if (getline(cin, game_commands)){
@@ -156,6 +210,27 @@ void ingame_commands(){ //GET user input in game
 			savegame << player;
 			savegame.close();
 			game();
+		} else if (game_commands == "SUPER1"){
+			if(player){
+				X.S1();
+			} else {
+				O.S1();
+			}
+			game();
+		} else if (game_commands == "SUPER2"){
+			if(player){
+				X.S2();
+			} else {
+				O.S2();
+			}
+			game();
+		} else if (game_commands == "SUPER3"){
+			if(player){
+				X.S3();
+			} else {
+				O.S3();
+			}
+			game();
 		} else {
 			istringstream seperate(game_commands); //Seperate input into char and int 
 			char alpha;
@@ -168,23 +243,44 @@ void ingame_commands(){ //GET user input in game
 				cout << "\a"; //Beep sound indicates invalid input
 			}
 			game();
-		}  //game() function are called to re-draw the game board with the necessary changes by user input	
+			//game() function are called to re-draw the game board with the necessary changes by user input	
+		}
 	}	
 }
 
 void validateMove(int right, int left){
 	int largest = right;
-	//board[num][alpha]=='X' || board[num][alpha]=='O'
-	if (player == true){ //X
-		SymbolX(left, right);
-		player = false;									
-	} 
-	else{ //O
-		SymbolO(left, right);
-		player = true;
+	bool checkpiece = (board[left][right]=='X' || board[left][right]=='O');
+	if (X.super1 || O.super1){
+		checkpiece = true;
+	}
+	if(!checkpiece){
+		if (player){ //X
+			SymbolX(left, right);
+			player = false;									
+		} 
+		else{ //O
+			SymbolO(left, right);
+			player = true;
+		}
+	} else {
+		if(X.super1 || O.super1){
+			X.super1 = false;
+			O.super1 = false;
+			if(player){
+				SymbolX(left, right);
+				player = false;									
+			} else{ //O
+				SymbolO(left, right);
+				player = true;
+			}
+		} else {
+		cout << "\a";
+		}
 	}
 	return;
 }
+
 void displayStatus() //Display player score and turn.
 {
 	int scoreX=0,scoreO=0;
