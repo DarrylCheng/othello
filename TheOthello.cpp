@@ -45,37 +45,34 @@ public:
 		super1 = false,super2 = false,super3 = false;
 	}
 	void S1(){
-		if (count1>0){
-			cout << "\a";
-		}
 		if (count1==0){
 			super1 = true;
 			count1=1;
-		} 
-	}
-	void S2(){
-		if (count2>0){
+		} else{
 			cout << "\a";
 		}
+	}
+	void S2(){
 		if (count2==0){
 			super2 = true;
 			count2=1;
-		} 
-	}
-	void S3(){
-		if(count3>0){
+		} else{
 			cout << "\a";
 		}
+	}
+	void S3(){
 		if (count3==0){
 			super3 = true;
 			count3=1;
-		} 		
+		} else{
+			cout << "\a";
+		}	
 	}
 	void powerdescription(){
 		if(super1){
 			cout << "   (Super power 1! You can place ANYWHERE you like!)";
 		} else if (super2){
-			cout << "   (Super power 2!)";
+			cout << "   (Super power 2! Two consequtive inputs!)";
 		} else if (super3) {
 			cout << "   (Super power 3!)";
 		}	
@@ -251,9 +248,10 @@ void ingame_commands(){ //GET user input in game
 void validateMove(int right, int left){
 	int largest = right;
 	bool checkpiece = (board[left][right]=='X' || board[left][right]=='O');
-	if (X.super1 || O.super1){
+	bool ori = checkpiece;
+	if (X.super1 || O.super1 || X.super2 || O.super2){
 		checkpiece = true;
-	}
+	} 
 	if(!checkpiece){
 		if (player){ //X
 			SymbolX(left, right);
@@ -274,8 +272,20 @@ void validateMove(int right, int left){
 				SymbolO(left, right);
 				player = true;
 			}
+		} else if(X.super2 || O.super2){
+			if(!ori){
+				X.super2 = false;
+				O.super2 = false;
+				if(player){
+				SymbolX(left, right);								
+				} else{ //O
+				SymbolO(left, right);
+				} 
+			} else {
+				cout << "\a";
+			}
 		} else {
-		cout << "\a";
+			cout << "\a";
 		}
 	}
 	return;
