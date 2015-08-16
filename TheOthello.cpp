@@ -28,6 +28,7 @@ void game();
 void ingame_commands();
 void validateMove(int,int);
 void helpPage(); 
+void flipping(int,int);
 void displayStatus(); //Display score and current player
 void convertIndex(char&, int&);
 
@@ -265,7 +266,6 @@ void ingame_commands(){ //GET user input in game
 }
 
 void validateMove(int right, int left){
-	int largest = right;
 	bool checkpiece = (board[left][right]=='X' || board[left][right]=='O');
 	bool ori = checkpiece;
 	if (X.super1||O.super1||X.super2||O.super2){
@@ -306,8 +306,8 @@ void validateMove(int right, int left){
 		} else {
 			cout << "\a";
 		}
-		return;
 	}
+	flipping(right, left);
 }
 
 void displayStatus() //Display player score and turn.
@@ -354,6 +354,8 @@ void helpPage() //Game instructions
 		<< "==> f 4\n\nSpaces that already contain a X or O cannot be inputted again,\nonce the game board is fully filled,"
 		<< " the game will display the winner and \nreturn to the game menu.\n";
 	cout << "\nOther available commands in-game are:\n==> menu (Back to menu and resets the game)\n==> next player (Forfeit your turn)\n";
+	cout << "==> save (Save the game and load it later)\n==> super1 (Place your move ANYWHERE)\n"
+		 << "==> super2 (Two consecutive turns\n==> super3 (Clear a random row)\n";
 	cout << "A *beep* sound will be made for every invalid input.\n\n";
 	system("pause"); //Pause 
 }
@@ -372,5 +374,45 @@ void convertIndex(char& alpha, int& num) //Convert them into array readable numb
 		num = numbers[num-1];
 	} else {
 		invalid=true; //Return as error
+	}
+}
+
+void flipping(const int right, const int left){
+	int col = right, location, row = left;
+	bool phase1=false,phase2=false;
+	if(board[left][right]=='X'){
+		if(board[left][col-1]=='O')
+			phase1=true;
+	} else if(board[left][right]=='O'){
+		if(board[left][col-1]=='X')
+			phase1=true;
+	}
+	if(phase1){
+		while(col>0){
+			if(board[left][right]=='X'){
+				if(board[left][col-1]=='X'){
+					phase2 = true;
+					location=col-1;
+					break;
+				}
+			} else if (board[left][right]=='O'){
+				if(board[left][col-1]=='O'){
+					phase2=true;
+					location=col-1;
+					break;
+				}
+			}
+			col--;
+		}
+	}
+	if(phase1 && phase2){
+		while(location<=right){
+			if(board[left][right]=='X'){
+				SymbolX(left,location);
+			} else if (board[left][right]=='O'){
+				SymbolO(left, location);
+			}
+			location++;
+		}
 	}
 }
