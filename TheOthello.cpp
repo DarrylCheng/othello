@@ -14,6 +14,7 @@ Phone: 012-737-0538
 #include <iomanip> //setw
 #include <sstream> //istringstream
 #include <fstream>
+#include <ctime>
 using namespace std;
 
 #define cls (system("cls")) //Clear screen
@@ -68,13 +69,29 @@ public:
 			cout << "\a";
 		}	
 	}
+	void superthree(){
+		if(super3){
+			srand(time(NULL));
+			int ran = rand()%8; //0-7
+			for(int i=0;i<8;i++){
+				board[ran][i] = ' ';
+			}
+		}
+		if(player && super3){
+			player=false;
+		} else if (!player && super3) {
+			player=true;
+		}
+		
+	}
 	void powerdescription(){
 		if(super1){
 			cout << "   (Super power 1! You can place ANYWHERE you like!)";
 		} else if (super2){
 			cout << "   (Super power 2! Two consequtive inputs!)";
 		} else if (super3) {
-			cout << "   (Super power 3!)";
+			cout << "   (Super power 3! Cleared a random row :P)";
+			super3 = false;
 		}	
 	}
 };
@@ -224,8 +241,10 @@ void ingame_commands(){ //GET user input in game
 		} else if (game_commands == "SUPER3"){
 			if(player){
 				X.S3();
+				X.superthree();
 			} else {
 				O.S3();
+				O.superthree();
 			}
 			game();
 		} else {
@@ -249,7 +268,7 @@ void validateMove(int right, int left){
 	int largest = right;
 	bool checkpiece = (board[left][right]=='X' || board[left][right]=='O');
 	bool ori = checkpiece;
-	if (X.super1 || O.super1 || X.super2 || O.super2){
+	if (X.super1||O.super1||X.super2||O.super2){
 		checkpiece = true;
 	} 
 	if(!checkpiece){
@@ -277,9 +296,9 @@ void validateMove(int right, int left){
 				X.super2 = false;
 				O.super2 = false;
 				if(player){
-				SymbolX(left, right);								
+					SymbolX(left, right);
 				} else{ //O
-				SymbolO(left, right);
+					SymbolO(left, right);
 				} 
 			} else {
 				cout << "\a";
@@ -287,8 +306,8 @@ void validateMove(int right, int left){
 		} else {
 			cout << "\a";
 		}
+		return;
 	}
-	return;
 }
 
 void displayStatus() //Display player score and turn.
