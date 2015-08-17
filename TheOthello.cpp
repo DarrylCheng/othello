@@ -380,6 +380,7 @@ void convertIndex(char& alpha, int& num) //Convert them into array readable numb
 void flipping(const int right, const int left){
 	int col = right, location, row = left;
 	bool phase1=false,phase2=false;
+	//west
 	if(board[left][right]=='X'){
 		if(board[left][col-1]=='O')
 			phase1=true;
@@ -413,6 +414,44 @@ void flipping(const int right, const int left){
 				SymbolO(left, location);
 			}
 			location++;
+		}
+	}
+	//east
+	phase1=false,phase2=false;
+	col = right,row = left;
+	if(board[left][right]=='X'){
+		if(board[left][col+1]=='O')
+			phase1=true;
+	} else if(board[left][right]=='O'){
+		if(board[left][col+1]=='X')
+			phase1=true;
+	}
+	if(phase1){
+		while(col<7){
+			if(board[left][right]=='X'){
+				if(board[left][col+1]=='X'){
+					phase2 = true;
+					location=col+1;
+					break;
+				}
+			} else if (board[left][right]=='O'){
+				if(board[left][col+1]=='O'){
+					phase2=true;
+					location=col+1;
+					break;
+				}
+			}
+			col++;
+		}
+	}
+	if(phase1 && phase2){
+		while(location>=right){
+			if(board[left][right]=='X'){
+				SymbolX(left,location);
+			} else if (board[left][right]=='O'){
+				SymbolO(left, location);
+			}
+			location--;
 		}
 	}
 }
