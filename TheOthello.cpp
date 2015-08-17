@@ -28,12 +28,11 @@ void game();
 void ingame_commands();
 void validateMove(int,int);
 void helpPage(); 
-void flipping(int,int);
+void flipping(int,int,bool&);
 void displayStatus(); //Display score and current player
 void convertIndex(char&, int&);
 
 bool player = true, invalid=false,done=false; //True for player X, false for player Y. Default first player will be X.
-bool super1,super2,super3;
 string line(50, '-');
 char board[8][8]; //Initialize (Multidimensional Array) Serves as the game board on screen.
 int totalscore=0; //If totalscore is 64 which is all the possible input spaces available, means the game has ended.
@@ -265,51 +264,6 @@ void ingame_commands(){ //GET user input in game
 	}	
 }
 
-void validateMove(int right, int left){
-	bool checkpiece = (board[left][right]=='X' || board[left][right]=='O');
-	bool ori = checkpiece;
-	if (X.super1||O.super1||X.super2||O.super2){
-		checkpiece = true;
-	} 
-	if(!checkpiece){
-		if (player){ //X
-			SymbolX(left, right);
-			player = false;									
-		} 
-		else{ //O
-			SymbolO(left, right);
-			player = true;
-		}
-	} else {
-		if(X.super1 || O.super1){
-			X.super1 = false;
-			O.super1 = false;
-			if(player){
-				SymbolX(left, right);
-				player = false;									
-			} else{ //O
-				SymbolO(left, right);
-				player = true;
-			}
-		} else if(X.super2 || O.super2){
-			if(!ori){
-				X.super2 = false;
-				O.super2 = false;
-				if(player){
-					SymbolX(left, right);
-				} else{ //O
-					SymbolO(left, right);
-				} 
-			} else {
-				cout << "\a";
-			}
-		} else {
-			cout << "\a";
-		}
-	}
-	flipping(right, left);
-}
-
 void displayStatus() //Display player score and turn.
 {
 	int scoreX=0,scoreO=0;
@@ -377,26 +331,89 @@ void convertIndex(char& alpha, int& num) //Convert them into array readable numb
 	}
 }
 
-void flipping(const int right, const int left){
-	int col = right, location, row = left;
+void validateMove(int right, int left){
+	bool checkpiece = (board[left][right]=='X' || board[left][right]=='O');
+	bool ori = checkpiece,validmove=false;
+	flipping(right, left, validmove);
+	if (X.super1||O.super1||X.super2||O.super2){
+		checkpiece = true;
+	} 
+	if(validmove){
+		if(!checkpiece){
+			if (player){ //X
+				SymbolX(left, right);
+				player = false;									
+			} 
+			else{ //O
+				SymbolO(left, right);
+				player = true;
+			}
+		} else {
+			if(X.super1 || O.super1){
+				X.super1 = false;
+				O.super1 = false;
+				if(player){
+					SymbolX(left, right);
+					player = false;									
+				} else{ //O
+					SymbolO(left, right);
+					player = true;
+				}
+			} else if(X.super2 || O.super2){
+				if(!ori){
+					X.super2 = false;
+					O.super2 = false;
+					if(player){
+						SymbolX(left, right);
+					} else{ //O
+						SymbolO(left, right);
+					} 
+				} else {
+					cout << "\a";
+				}
+			} else {
+				cout << "\a";
+			}
+		}
+	} else {
+		if(X.super1 || O.super1){
+			X.super1 = false;
+			O.super1 = false;
+			if(player){
+				SymbolX(left, right);
+				player = false;				
+			} else{ //O
+				SymbolO(left, right);
+				player = true;
+			}
+		} else {
+			cout << "\a";
+		}
+	}
+}
+
+void flipping(const int right, const int left, bool& validmove){
+	int col = right, row = left, location;
 	bool phase1=false,phase2=false;
+
+
 	//west
-	if(board[left][right]=='X'){
+	if(player){
 		if(board[left][col-1]=='O')
 			phase1=true;
-	} else if(board[left][right]=='O'){
+	} else {
 		if(board[left][col-1]=='X')
 			phase1=true;
 	}
 	if(phase1){
 		while(col>0){
-			if(board[left][right]=='X'){
+			if(player){
 				if(board[left][col-1]=='X'){
 					phase2 = true;
 					location=col-1;
 					break;
 				}
-			} else if (board[left][right]=='O'){
+			} else {
 				if(board[left][col-1]=='O'){
 					phase2=true;
 					location=col-1;
@@ -407,34 +424,37 @@ void flipping(const int right, const int left){
 		}
 	}
 	if(phase1 && phase2){
+		validmove = true;
 		while(location<=right){
-			if(board[left][right]=='X'){
+			if(player){
 				SymbolX(left,location);
-			} else if (board[left][right]=='O'){
+			} else {
 				SymbolO(left, location);
 			}
 			location++;
 		}
 	}
+
+
 	//east
 	phase1=false,phase2=false;
 	col = right,row = left;
-	if(board[left][right]=='X'){
+	if(player){
 		if(board[left][col+1]=='O')
 			phase1=true;
-	} else if(board[left][right]=='O'){
+	} else {
 		if(board[left][col+1]=='X')
 			phase1=true;
 	}
 	if(phase1){
 		while(col<7){
-			if(board[left][right]=='X'){
+			if(player){
 				if(board[left][col+1]=='X'){
 					phase2 = true;
 					location=col+1;
 					break;
 				}
-			} else if (board[left][right]=='O'){
+			} else {
 				if(board[left][col+1]=='O'){
 					phase2=true;
 					location=col+1;
@@ -445,34 +465,37 @@ void flipping(const int right, const int left){
 		}
 	}
 	if(phase1 && phase2){
+		validmove = true;
 		while(location>=right){
-			if(board[left][right]=='X'){
+			if(player){
 				SymbolX(left,location);
-			} else if (board[left][right]=='O'){
+			} else {
 				SymbolO(left, location);
 			}
 			location--;
 		}
 	}
+
+
 	//NORTH
 	phase1=false,phase2=false;
 	col = right,row = left;
-	if(board[left][right]=='X'){
+	if(player){
 		if(board[row-1][right]=='O')
 			phase1=true;
-	} else if(board[left][right]=='O'){
+	} else {
 		if(board[row-1][right]=='X')
 			phase1=true;
 	}
 	if(phase1){
 		while(row>0){
-			if(board[left][right]=='X'){
+			if(player){
 				if(board[row-1][right]=='X'){
 					phase2 = true;
 					location=row-1;
 					break;
 				}
-			} else if (board[left][right]=='O'){
+			} else {
 				if(board[row-1][right]=='O'){
 					phase2=true;
 					location=row-1;
@@ -483,34 +506,37 @@ void flipping(const int right, const int left){
 		}
 	}
 	if(phase1 && phase2){
+		validmove = true;
 		while(location<=left){
-			if(board[left][right]=='X'){
+			if(player){
 				SymbolX(location,right);
-			} else if (board[left][right]=='O'){
+			} else {
 				SymbolO(location, right);
 			}
 			location++;
 		}
 	}
+
+
 	//SOUTH
 	phase1=false,phase2=false;
 	col = right,row = left;
-	if(board[left][right]=='X'){
+	if(player){
 		if(board[row+1][right]=='O')
 			phase1=true;
-	} else if(board[left][right]=='O'){
+	} else {
 		if(board[row+1][right]=='X')
 			phase1=true;
 	}
 	if(phase1){
 		while(row<7){
-			if(board[left][right]=='X'){
+			if(player){
 				if(board[row+1][right]=='X'){
 					phase2 = true;
 					location=row+1;
 					break;
 				}
-			} else if (board[left][right]=='O'){
+			} else {
 				if(board[row+1][right]=='O'){
 					phase2=true;
 					location=row+1;
@@ -521,10 +547,11 @@ void flipping(const int right, const int left){
 		}
 	}
 	if(phase1 && phase2){
+		validmove = true;
 		while(location>=left){
-			if(board[left][right]=='X'){
+			if(player){
 				SymbolX(location,right);
-			} else if (board[left][right]=='O'){
+			} else {
 				SymbolO(location, right);
 			}
 			location--;
