@@ -40,31 +40,31 @@ int totalscore=0; //If totalscore is 64 which is all the possible input spaces a
 class SPower{
 public:
 	bool super1,super2,super3;
-	int count1,count2,count3;
+	bool count1,count2,count3;
 	void init(){
-		count1 = 0, count2 = 0,count3 = 0;
+		count1 = false, count2 = false,count3 = false;
 		super1 = false,super2 = false,super3 = false;
 	}
 	void S1(){
-		if (count1==0){
+		if (!count1){
 			super1 = true;
-			count1=1;
+			count1=true;
 		} else{
 			cout << "\a";
 		}
 	}
 	void S2(){
-		if (count2==0){
+		if (!count2){
 			super2 = true;
-			count2=1;
+			count2=true;
 		} else{
 			cout << "\a";
 		}
 	}
 	void S3(){
-		if (count3==0){
+		if (!count3){
 			super3 = true;
-			count3=1;
+			count3=true;
 		} else{
 			cout << "\a";
 		}	
@@ -142,15 +142,15 @@ void menu() //Start up screen
 					read.get(board[Z][Y]);
 				}
 			}
-			read >> player;
-			/*
-			char xx[6];
+			char xx[7];
 			read >> xx;
-			cout << xx[0] << " " << xx[1] << " ";
-			system("pause");
-			//X.count1 >> X.count2 >> X.count3 >> O.count1 >> O.count2 >> O.count3;
-			Need save count* status and super1-3 T F status!
-			*/
+			player=xx[0]-48;
+			X.count1=xx[1]-48;
+			X.count2=xx[2]-48;
+			X.count3=xx[3]-48;
+			O.count1=xx[4]-48;
+			O.count2=xx[5]-48;
+			O.count3=xx[6]-48;
 			read.close();
 			menu = false;
 			game();
@@ -312,13 +312,15 @@ void helpPage() //Game instructions
 {
 	cls;
 	banner;
-	cout  << "In game instructions:\nTo input into the game board, type in the format of (A-H, 1-8) for example \n"
-		<< "==> f 4\n\nSpaces that already contain a X or O cannot be inputted again,\nonce the game board is fully filled,"
-		<< " the game will display the winner and \nreturn to the game menu.\n";
-	cout << "\nOther available commands in-game are:\n==> menu (Back to menu and resets the game)\n==> next player (Forfeit your turn)\n";
-	cout << "==> save (Save the game and load it later)\n==> super1 (Place your move ANYWHERE)\n"
-		 << "==> super2 (Two consecutive turns\n==> super3 (Clear a random row)\n";
-	cout << "A *beep* sound will be made for every invalid input.\n\n";
+	cout  << "In game instructions:\nTo input into the game board, type in the format of (A-H, 1-8)" 
+		  << " for example \n==> f 4\n\n"
+		  <<"Spaces that already contain a X or O cannot be inputted again,\nonce the game board is fully filled,"
+		  << " the game will display the winner and \nreturn to the game menu.\n";
+	cout  << "\nOther available commands in-game are:\n==> menu (Back to menu and resets the game)\n"
+		  <<"==> next player (Forfeit your turn)\n";
+	cout  << "==> save (Save the game and load it later)\n==> super1 (Place your move ANYWHERE)\n"
+		  << "==> super2 (Two consecutive turns\n==> super3 (Clear a random row)\n";
+	cout  << "A *beep* sound will be made for every invalid input.\n\n";
 	system("pause"); //Pause 
 }
 
@@ -404,7 +406,6 @@ void flipping(const int right, const int left, bool& validmove){
 	int col = right, row = left, leftpos, rightpos;
 	bool phase1=false,phase2=false;
 
-
 	//west
 	if(player){
 		if(board[left][col-1]=='O')
@@ -415,6 +416,8 @@ void flipping(const int right, const int left, bool& validmove){
 	}
 	if(phase1){
 		while(col>0){
+			if(board[left][col-1]==' ')
+				break;
 			if(player){
 				if(board[left][col-1]=='X'){
 					phase2 = true;
@@ -456,6 +459,8 @@ void flipping(const int right, const int left, bool& validmove){
 	}
 	if(phase1){
 		while(col<7){
+			if(board[left][col+1]==' ')
+				break;
 			if(player){
 				if(board[left][col+1]=='X'){
 					phase2 = true;
@@ -497,6 +502,8 @@ void flipping(const int right, const int left, bool& validmove){
 	}
 	if(phase1){
 		while(row>0){
+			if(board[row-1][right]==' ')
+				break;
 			if(player){
 				if(board[row-1][right]=='X'){
 					phase2 = true;
@@ -538,6 +545,8 @@ void flipping(const int right, const int left, bool& validmove){
 	}
 	if(phase1){
 		while(row<7){
+			if(board[row+1][right]==' ')
+				break;
 			if(player){
 				if(board[row+1][right]=='X'){
 					phase2 = true;
@@ -578,6 +587,8 @@ void flipping(const int right, const int left, bool& validmove){
 	}
 	if(phase1){
 		while(row>0 && col>0){
+			if(board[row-1][col-1]==' ')
+				break;
 			if(player){
 				if(board[row-1][col-1]=='X'){
 					phase2 = true;
@@ -622,6 +633,8 @@ void flipping(const int right, const int left, bool& validmove){
 	}
 	if(phase1){
 		while(row>0 && col<7){
+			if(board[row-1][col+1]==' ')
+				break;
 			if(player){
 				if(board[row-1][col+1]=='X'){
 					phase2 = true;
@@ -666,6 +679,8 @@ void flipping(const int right, const int left, bool& validmove){
 	}
 	if(phase1){
 		while(row<7 && col<7){
+			if(board[row+1][col+1]==' ')
+				break;
 			if(player){
 				if(board[row+1][col+1]=='X'){
 					phase2 = true;
@@ -710,6 +725,8 @@ void flipping(const int right, const int left, bool& validmove){
 	}
 	if(phase1){
 		while(row<7 && col>0){
+			if(board[row+1][col-1]==' ')
+				break;
 			if(player){
 				if(board[row+1][col-1]=='X'){
 					phase2 = true;
