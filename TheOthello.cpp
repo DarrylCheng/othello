@@ -107,10 +107,10 @@ int main() //Main function
 
 void menu() //Start up screen 
 {
-	static string selections = "1. New Game\n2. Load a game\n3. Help\n4. Quit\n\n";
-	string menu_commands;
 	X.init();
 	O.init();
+	static string selections = "1. New Game\n2. Load a game\n3. Help\n4. Quit\n\n";
+	string menu_commands;
 	bool menu=true,super1=false,super2=false,super3=false;
 	for (int i=0;i<=7;i++){ //For loop used to reset/re-initialize all array
 		for(int j=0;j<=7;j++){
@@ -137,13 +137,20 @@ void menu() //Start up screen
 		else if (menu_commands == "2" || menu_commands == "LOAD A GAME"){
 			ifstream read;
 			read.open("a.txt");
-			for(int X=0;X<8;X++){
+			for(int Z=0;Z<8;Z++){
 				for(int Y=0;Y<8;Y++){
-
-					read.get(board[X][Y]);
+					read.get(board[Z][Y]);
 				}
 			}
 			read >> player;
+			/*
+			char xx[6];
+			read >> xx;
+			cout << xx[0] << " " << xx[1] << " ";
+			system("pause");
+			//X.count1 >> X.count2 >> X.count3 >> O.count1 >> O.count2 >> O.count3;
+			Need save count* status and super1-3 T F status!
+			*/
 			read.close();
 			menu = false;
 			game();
@@ -216,12 +223,13 @@ void ingame_commands(){ //GET user input in game
 		else if (game_commands == "SAVE"){
 			ofstream savegame;
 			savegame.open("a.txt");
-			for(int X=0;X<8;X++){
+			for(int Z=0;Z<8;Z++){
 				for(int Y=0;Y<8;Y++){
-					savegame << board[X][Y];
+					savegame << board[Z][Y];
 				}
 			}
 			savegame << player;
+			savegame << X.count1 << X.count2 << X.count3 << O.count1 << O.count2 << O.count3;
 			savegame.close();
 			game();
 		} else if (game_commands == "SUPER1"){
@@ -393,7 +401,7 @@ void validateMove(int right, int left){
 }
 
 void flipping(const int right, const int left, bool& validmove){
-	int col = right, row = left, location;
+	int col = right, row = left, leftpos, rightpos;
 	bool phase1=false,phase2=false;
 
 
@@ -410,13 +418,13 @@ void flipping(const int right, const int left, bool& validmove){
 			if(player){
 				if(board[left][col-1]=='X'){
 					phase2 = true;
-					location=col-1;
+					leftpos=col-1;
 					break;
 				}
 			} else {
 				if(board[left][col-1]=='O'){
 					phase2=true;
-					location=col-1;
+					leftpos=col-1;
 					break;
 				}
 			}
@@ -425,13 +433,13 @@ void flipping(const int right, const int left, bool& validmove){
 	}
 	if(phase1 && phase2){
 		validmove = true;
-		while(location<=right){
+		while(leftpos<=right){
 			if(player){
-				SymbolX(left,location);
+				SymbolX(left,leftpos);
 			} else {
-				SymbolO(left, location);
+				SymbolO(left, leftpos);
 			}
-			location++;
+			leftpos++;
 		}
 	}
 
@@ -451,13 +459,13 @@ void flipping(const int right, const int left, bool& validmove){
 			if(player){
 				if(board[left][col+1]=='X'){
 					phase2 = true;
-					location=col+1;
+					leftpos=col+1;
 					break;
 				}
 			} else {
 				if(board[left][col+1]=='O'){
 					phase2=true;
-					location=col+1;
+					leftpos=col+1;
 					break;
 				}
 			}
@@ -466,13 +474,13 @@ void flipping(const int right, const int left, bool& validmove){
 	}
 	if(phase1 && phase2){
 		validmove = true;
-		while(location>=right){
+		while(leftpos>=right){
 			if(player){
-				SymbolX(left,location);
+				SymbolX(left,leftpos);
 			} else {
-				SymbolO(left, location);
+				SymbolO(left, leftpos);
 			}
-			location--;
+			leftpos--;
 		}
 	}
 
@@ -492,13 +500,13 @@ void flipping(const int right, const int left, bool& validmove){
 			if(player){
 				if(board[row-1][right]=='X'){
 					phase2 = true;
-					location=row-1;
+					leftpos=row-1;
 					break;
 				}
 			} else {
 				if(board[row-1][right]=='O'){
 					phase2=true;
-					location=row-1;
+					leftpos=row-1;
 					break;
 				}
 			}
@@ -507,13 +515,13 @@ void flipping(const int right, const int left, bool& validmove){
 	}
 	if(phase1 && phase2){
 		validmove = true;
-		while(location<=left){
+		while(leftpos<=left){
 			if(player){
-				SymbolX(location,right);
+				SymbolX(leftpos,right);
 			} else {
-				SymbolO(location, right);
+				SymbolO(leftpos, right);
 			}
-			location++;
+			leftpos++;
 		}
 	}
 
@@ -533,13 +541,13 @@ void flipping(const int right, const int left, bool& validmove){
 			if(player){
 				if(board[row+1][right]=='X'){
 					phase2 = true;
-					location=row+1;
+					leftpos=row+1;
 					break;
 				}
 			} else {
 				if(board[row+1][right]=='O'){
 					phase2=true;
-					location=row+1;
+					leftpos=row+1;
 					break;
 				}
 			}
@@ -548,13 +556,189 @@ void flipping(const int right, const int left, bool& validmove){
 	}
 	if(phase1 && phase2){
 		validmove = true;
-		while(location>=left){
+		while(leftpos>=left){
 			if(player){
-				SymbolX(location,right);
+				SymbolX(leftpos,right);
 			} else {
-				SymbolO(location, right);
+				SymbolO(leftpos, right);
 			}
-			location--;
+			leftpos--;
+		}
+	}
+
+	//NW
+	phase1=false,phase2=false;
+	col = right,row = left;
+	if(player){
+		if(board[row-1][col-1]=='O')
+			phase1=true;
+	} else {
+		if(board[row-1][col-1]=='X')
+			phase1=true;
+	}
+	if(phase1){
+		while(row>0 && col>0){
+			if(player){
+				if(board[row-1][col-1]=='X'){
+					phase2 = true;
+					leftpos=row-1;
+					rightpos=col-1;
+					break;
+				}
+			} else {
+				if(board[row-1][col-1]=='O'){
+					phase2=true;
+					leftpos=row-1;
+					rightpos=col-1;
+					break;
+				}
+			}
+			row--;
+			col--;
+		}
+	}
+	if(phase1 && phase2){
+		validmove = true;
+		while(leftpos<=left && rightpos<=right){
+			if(player){
+				SymbolX(leftpos,rightpos);
+			} else {
+				SymbolO(leftpos,rightpos);
+			}
+			leftpos++;
+			rightpos++;
+		}
+	}
+
+	//NE
+	phase1=false,phase2=false;
+	col = right,row = left;
+	if(player){
+		if(board[row-1][col+1]=='O')
+			phase1=true;
+	} else {
+		if(board[row-1][col+1]=='X')
+			phase1=true;
+	}
+	if(phase1){
+		while(row>0 && col<7){
+			if(player){
+				if(board[row-1][col+1]=='X'){
+					phase2 = true;
+					leftpos=row-1;
+					rightpos=col+1;
+					break;
+				}
+			} else {
+				if(board[row-1][col+1]=='O'){
+					phase2=true;
+					leftpos=row-1;
+					rightpos=col+1;
+					break;
+				}
+			}
+			row--;
+			col++;
+		}
+	}
+	if(phase1 && phase2){
+		validmove = true;
+		while(leftpos<=left && rightpos>=right){
+			if(player){
+				SymbolX(leftpos,rightpos);
+			} else {
+				SymbolO(leftpos,rightpos);
+			}
+			leftpos++;
+			rightpos--;
+		}
+	}
+
+	//SE
+	phase1=false,phase2=false;
+	col = right,row = left;
+	if(player){
+		if(board[row+1][col+1]=='O')
+			phase1=true;
+	} else {
+		if(board[row+1][col+1]=='X')
+			phase1=true;
+	}
+	if(phase1){
+		while(row<7 && col<7){
+			if(player){
+				if(board[row+1][col+1]=='X'){
+					phase2 = true;
+					leftpos=row+1;
+					rightpos=col+1;
+					break;
+				}
+			} else {
+				if(board[row+1][col+1]=='O'){
+					phase2=true;
+					leftpos=row+1;
+					rightpos=col+1;
+					break;
+				}
+			}
+			row++;
+			col++;
+		}
+	}
+	if(phase1 && phase2){
+		validmove = true;
+		while(leftpos>=left && rightpos>=right){
+			if(player){
+				SymbolX(leftpos,rightpos);
+			} else {
+				SymbolO(leftpos,rightpos);
+			}
+			leftpos--;
+			rightpos--;
+		}
+	}
+
+	//SW
+	phase1=false,phase2=false;
+	col = right,row = left;
+	if(player){
+		if(board[row+1][col-1]=='O')
+			phase1=true;
+	} else {
+		if(board[row+1][col-1]=='X')
+			phase1=true;
+	}
+	if(phase1){
+		while(row<7 && col>0){
+			if(player){
+				if(board[row+1][col-1]=='X'){
+					phase2 = true;
+					leftpos=row+1;
+					rightpos=col-1;
+					break;
+				}
+			} else {
+				if(board[row+1][col-1]=='O'){
+					phase2=true;
+					leftpos=row+1;
+					rightpos=col-1;
+					break;
+				}
+			}
+			row++;
+			col--;
+		}
+	}
+	if(phase1 && phase2){
+		validmove = true;
+		while(leftpos>=left && rightpos<=right){
+			if(player){
+				SymbolX(leftpos,rightpos);
+			} else {
+				SymbolO(leftpos,rightpos);
+			}
+			leftpos--;
+			rightpos++;
 		}
 	}
 }
