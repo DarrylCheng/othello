@@ -161,6 +161,7 @@ void menu() //Start up screen
 		else if (menu_commands == "4" || menu_commands == "QUIT"){
 			menu = false;
 			cout << "Good bye!"; 
+			return;
 			//Back to main()
 		}
 		else {
@@ -319,7 +320,7 @@ void helpPage() //Game instructions
 	cout  << "\nOther available commands in-game are:\n==> menu (Back to menu and resets the game)\n"
 		  <<"==> next player (Forfeit your turn)\n";
 	cout  << "==> save (Save the game and load it later)\n==> super1 (Place your move ANYWHERE)\n"
-		  << "==> super2 (Two consecutive turns\n==> super3 (Clear a random row)\n";
+		  << "==> super2 (Two consecutive turns)\n==> super3 (Clear a random row)\n";
 	cout  << "A *beep* sound will be made for every invalid input.\n\n";
 	system("pause"); //Pause 
 }
@@ -344,12 +345,36 @@ void convertIndex(char& alpha, int& num) //Convert them into array readable numb
 void validateMove(int right, int left){
 	bool checkpiece = (board[left][right]=='X' || board[left][right]=='O');
 	bool ori = checkpiece,validmove=false;
-	flipping(right, left, validmove);
-	if (X.super1||O.super1||X.super2||O.super2){
+	if (X.super1||O.super1){
 		checkpiece = true;
 	} 
-	if(validmove){
-		if(!checkpiece){
+	if (!checkpiece){
+		flipping(right, left, validmove);
+	} else if (X.super1||O.super1||X.super2||O.super2){
+		if(X.super1 || O.super1){
+			if(player){
+				SymbolX(left, right);
+				player = false;									
+			} else{ //O
+				SymbolO(left, right);
+				player = true;
+			}
+		} 
+		flipping(right, left, validmove);
+	} else {
+		cout << "\a";
+	}
+
+	if(validmove && !checkpiece){
+		if(X.super2 || O.super2){
+			X.super2 = false;
+			O.super2 = false;
+			if(player){
+				SymbolX(left, right);
+			} else{ //O
+				SymbolO(left, right);
+			} 
+		} else {
 			if (player){ //X
 				SymbolX(left, right);
 				player = false;									
@@ -358,44 +383,11 @@ void validateMove(int right, int left){
 				SymbolO(left, right);
 				player = true;
 			}
-		} else {
-			if(X.super1 || O.super1){
-				X.super1 = false;
-				O.super1 = false;
-				if(player){
-					SymbolX(left, right);
-					player = false;									
-				} else{ //O
-					SymbolO(left, right);
-					player = true;
-				}
-			} else if(X.super2 || O.super2){
-				if(!ori){
-					X.super2 = false;
-					O.super2 = false;
-					if(player){
-						SymbolX(left, right);
-					} else{ //O
-						SymbolO(left, right);
-					} 
-				} else {
-					cout << "\a";
-				}
-			} else {
-				cout << "\a";
-			}
 		}
 	} else {
-		if(X.super1 || O.super1){
+		if (X.super1 || O.super1){
 			X.super1 = false;
 			O.super1 = false;
-			if(player){
-				SymbolX(left, right);
-				player = false;				
-			} else{ //O
-				SymbolO(left, right);
-				player = true;
-			}
 		} else {
 			cout << "\a";
 		}
