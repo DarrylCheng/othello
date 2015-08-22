@@ -351,6 +351,7 @@ void validateMove(int right, int left){
 	if (!checkpiece){
 		flipping(right, left, validmove);
 	} else if (X.super1||O.super1||X.super2||O.super2){
+		flipping(right, left, validmove);
 		if(X.super1 || O.super1){
 			if(player){
 				SymbolX(left, right);
@@ -360,7 +361,6 @@ void validateMove(int right, int left){
 				player = true;
 			}
 		} 
-		flipping(right, left, validmove);
 	} else {
 		cout << "\a";
 	}
@@ -394,360 +394,56 @@ void validateMove(int right, int left){
 	}
 }
 
-void flipping(const int right, const int left, bool& validmove){
-	int col = right, row = left, leftpos, rightpos;
+void flipping(const int RIGHT, const int LEFT, bool& validmove){
 	bool phase1=false,phase2=false;
-
-	//west
-	if(player){
-		if(board[left][col-1]=='O')
-			phase1=true;
-	} else {
-		if(board[left][col-1]=='X')
-			phase1=true;
-	}
-	if(phase1){
-		while(col>0){
-			if(board[left][col-1]==' ')
-				break;
-			if(player){
-				if(board[left][col-1]=='X'){
-					phase2 = true;
-					leftpos=col-1;
+	const int LEFTINCRE[9] = {-1,-1,-1,0,0,0,1,1,1};
+	const int RIGHTINCRE[9] = {-1,0,1,-1,0,1,-1,0,1};
+	int leftvalue[9] = {-1,-1,-1,0,0,0,1,1,1};
+	int rightvalue[9] = {-1,0,1,-1,0,1,-1,0,1};
+	char sym;
+	if (player)
+		sym='X';
+	else 
+		sym='O';
+	for(int i=0;i<9;i++){
+		phase1=false; phase2=false;
+		//Phase 1 start
+		if (player){
+			if(board[LEFT+leftvalue[i]][RIGHT+rightvalue[i]]=='O'){
+				phase1=true;
+			}
+		} else {
+			if(board[LEFT+leftvalue[i]][RIGHT+rightvalue[i]]=='X'){
+				phase1=true;
+			}
+		}
+		if(phase1){
+			while(LEFT+leftvalue[i]>=0 && LEFT+leftvalue[i]<8 && RIGHT+rightvalue[i]>=0 && RIGHT+rightvalue[i]<8){
+				leftvalue[i]+=LEFTINCRE[i];
+				rightvalue[i]+=RIGHTINCRE[i];
+				if(board[LEFT+leftvalue[i]][RIGHT+rightvalue[i]]==' '){
 					break;
 				}
-			} else {
-				if(board[left][col-1]=='O'){
+				if (board[LEFT+leftvalue[i]][RIGHT+rightvalue[i]]==sym){
 					phase2=true;
-					leftpos=col-1;
 					break;
 				}
 			}
-			col--;
 		}
-	}
-	if(phase1 && phase2){
-		validmove = true;
-		while(leftpos<=right){
-			if(player){
-				SymbolX(left,leftpos);
-			} else {
-				SymbolO(left, leftpos);
-			}
-			leftpos++;
-		}
-	}
-
-
-	//east
-	phase1=false,phase2=false;
-	col = right,row = left;
-	if(player){
-		if(board[left][col+1]=='O')
-			phase1=true;
-	} else {
-		if(board[left][col+1]=='X')
-			phase1=true;
-	}
-	if(phase1){
-		while(col<7){
-			if(board[left][col+1]==' ')
-				break;
-			if(player){
-				if(board[left][col+1]=='X'){
-					phase2 = true;
-					leftpos=col+1;
-					break;
-				}
-			} else {
-				if(board[left][col+1]=='O'){
-					phase2=true;
-					leftpos=col+1;
-					break;
+		//phase2 end
+		//phase 3 start
+		if(phase1 && phase2){
+			validmove=true;
+			while(!(rightvalue[i]==RIGHTINCRE[i]) || !(leftvalue[i]==LEFTINCRE[i])){
+				rightvalue[i] -= RIGHTINCRE[i];
+				leftvalue[i] -= LEFTINCRE[i];
+				if(player){
+					SymbolX(LEFT+leftvalue[i],RIGHT+rightvalue[i]);
+				} else {
+					SymbolO(LEFT+leftvalue[i],RIGHT+rightvalue[i]);
 				}
 			}
-			col++;
 		}
-	}
-	if(phase1 && phase2){
-		validmove = true;
-		while(leftpos>=right){
-			if(player){
-				SymbolX(left,leftpos);
-			} else {
-				SymbolO(left, leftpos);
-			}
-			leftpos--;
-		}
-	}
-
-
-	//NORTH
-	phase1=false,phase2=false;
-	col = right,row = left;
-	if(player){
-		if(board[row-1][right]=='O')
-			phase1=true;
-	} else {
-		if(board[row-1][right]=='X')
-			phase1=true;
-	}
-	if(phase1){
-		while(row>0){
-			if(board[row-1][right]==' ')
-				break;
-			if(player){
-				if(board[row-1][right]=='X'){
-					phase2 = true;
-					leftpos=row-1;
-					break;
-				}
-			} else {
-				if(board[row-1][right]=='O'){
-					phase2=true;
-					leftpos=row-1;
-					break;
-				}
-			}
-			row--;
-		}
-	}
-	if(phase1 && phase2){
-		validmove = true;
-		while(leftpos<=left){
-			if(player){
-				SymbolX(leftpos,right);
-			} else {
-				SymbolO(leftpos, right);
-			}
-			leftpos++;
-		}
-	}
-
-
-	//SOUTH
-	phase1=false,phase2=false;
-	col = right,row = left;
-	if(player){
-		if(board[row+1][right]=='O')
-			phase1=true;
-	} else {
-		if(board[row+1][right]=='X')
-			phase1=true;
-	}
-	if(phase1){
-		while(row<7){
-			if(board[row+1][right]==' ')
-				break;
-			if(player){
-				if(board[row+1][right]=='X'){
-					phase2 = true;
-					leftpos=row+1;
-					break;
-				}
-			} else {
-				if(board[row+1][right]=='O'){
-					phase2=true;
-					leftpos=row+1;
-					break;
-				}
-			}
-			row++;
-		}
-	}
-	if(phase1 && phase2){
-		validmove = true;
-		while(leftpos>=left){
-			if(player){
-				SymbolX(leftpos,right);
-			} else {
-				SymbolO(leftpos, right);
-			}
-			leftpos--;
-		}
-	}
-
-	//NW
-	phase1=false,phase2=false;
-	col = right,row = left;
-	if(player){
-		if(board[row-1][col-1]=='O')
-			phase1=true;
-	} else {
-		if(board[row-1][col-1]=='X')
-			phase1=true;
-	}
-	if(phase1){
-		while(row>0 && col>0){
-			if(board[row-1][col-1]==' ')
-				break;
-			if(player){
-				if(board[row-1][col-1]=='X'){
-					phase2 = true;
-					leftpos=row-1;
-					rightpos=col-1;
-					break;
-				}
-			} else {
-				if(board[row-1][col-1]=='O'){
-					phase2=true;
-					leftpos=row-1;
-					rightpos=col-1;
-					break;
-				}
-			}
-			row--;
-			col--;
-		}
-	}
-	if(phase1 && phase2){
-		validmove = true;
-		while(leftpos<=left && rightpos<=right){
-			if(player){
-				SymbolX(leftpos,rightpos);
-			} else {
-				SymbolO(leftpos,rightpos);
-			}
-			leftpos++;
-			rightpos++;
-		}
-	}
-
-	//NE
-	phase1=false,phase2=false;
-	col = right,row = left;
-	if(player){
-		if(board[row-1][col+1]=='O')
-			phase1=true;
-	} else {
-		if(board[row-1][col+1]=='X')
-			phase1=true;
-	}
-	if(phase1){
-		while(row>0 && col<7){
-			if(board[row-1][col+1]==' ')
-				break;
-			if(player){
-				if(board[row-1][col+1]=='X'){
-					phase2 = true;
-					leftpos=row-1;
-					rightpos=col+1;
-					break;
-				}
-			} else {
-				if(board[row-1][col+1]=='O'){
-					phase2=true;
-					leftpos=row-1;
-					rightpos=col+1;
-					break;
-				}
-			}
-			row--;
-			col++;
-		}
-	}
-	if(phase1 && phase2){
-		validmove = true;
-		while(leftpos<=left && rightpos>=right){
-			if(player){
-				SymbolX(leftpos,rightpos);
-			} else {
-				SymbolO(leftpos,rightpos);
-			}
-			leftpos++;
-			rightpos--;
-		}
-	}
-
-	//SE
-	phase1=false,phase2=false;
-	col = right,row = left;
-	if(player){
-		if(board[row+1][col+1]=='O')
-			phase1=true;
-	} else {
-		if(board[row+1][col+1]=='X')
-			phase1=true;
-	}
-	if(phase1){
-		while(row<7 && col<7){
-			if(board[row+1][col+1]==' ')
-				break;
-			if(player){
-				if(board[row+1][col+1]=='X'){
-					phase2 = true;
-					leftpos=row+1;
-					rightpos=col+1;
-					break;
-				}
-			} else {
-				if(board[row+1][col+1]=='O'){
-					phase2=true;
-					leftpos=row+1;
-					rightpos=col+1;
-					break;
-				}
-			}
-			row++;
-			col++;
-		}
-	}
-	if(phase1 && phase2){
-		validmove = true;
-		while(leftpos>=left && rightpos>=right){
-			if(player){
-				SymbolX(leftpos,rightpos);
-			} else {
-				SymbolO(leftpos,rightpos);
-			}
-			leftpos--;
-			rightpos--;
-		}
-	}
-
-	//SW
-	phase1=false,phase2=false;
-	col = right,row = left;
-	if(player){
-		if(board[row+1][col-1]=='O')
-			phase1=true;
-	} else {
-		if(board[row+1][col-1]=='X')
-			phase1=true;
-	}
-	if(phase1){
-		while(row<7 && col>0){
-			if(board[row+1][col-1]==' ')
-				break;
-			if(player){
-				if(board[row+1][col-1]=='X'){
-					phase2 = true;
-					leftpos=row+1;
-					rightpos=col-1;
-					break;
-				}
-			} else {
-				if(board[row+1][col-1]=='O'){
-					phase2=true;
-					leftpos=row+1;
-					rightpos=col-1;
-					break;
-				}
-			}
-			row++;
-			col--;
-		}
-	}
-	if(phase1 && phase2){
-		validmove = true;
-		while(leftpos>=left && rightpos<=right){
-			if(player){
-				SymbolX(leftpos,rightpos);
-			} else {
-				SymbolO(leftpos,rightpos);
-			}
-			leftpos--;
-			rightpos++;
-		}
+		//phase 3 end
 	}
 }
