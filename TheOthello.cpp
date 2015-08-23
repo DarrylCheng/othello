@@ -281,11 +281,11 @@ void displayStatus() //Display player score and turn.
 		}
 	}
 	totalscore = scoreO + scoreX;
-	if (totalscore == 64){
+	if (totalscore == 64){ //If game is completely filled, game ends.
 		done = true;
 	}
-	if (scoreO == 0 || scoreX == 0){
-		done = true;
+	if (scoreO == 0 || scoreX == 0){ //In the event where game is not possible to continue
+		done = true; 
 	}
 	cout << "\nScore:\t\tO = " << scoreO << "\tX = " << scoreX << endl;
 	if (!done){
@@ -347,7 +347,7 @@ void validateMove(int right, int left){
 	} 
 	if (!checkpiece){
 		flipping(right, left, validmove);
-	} else if (X.super1||O.super1||X.super2||O.super2){
+	} else if (X.super1||O.super1){
 		flipping(right, left, validmove);
 		if(X.super1 || O.super1){
 			if(player){
@@ -398,10 +398,12 @@ void flipping(const int RIGHT, const int LEFT, bool& validmove){
 	int leftvalue[9] = {-1,-1,-1,0,0,0,1,1,1};
 	int rightvalue[9] = {-1,0,1,-1,0,1,-1,0,1};
 	char sym;
+	
 	if (player)
 		sym='X';
 	else 
 		sym='O';
+
 	for(int i=0;i<9;i++){
 		phase1=false; phase2=false;
 		//Phase 1 start
