@@ -33,7 +33,7 @@ void displayStatus(); //Display score and current player
 void convertIndex(char&, int&);
 
 bool player = true, invalid=false,done=false; //True for player X, false for player Y. Default first player will be X.
-string line(50, '-');
+string line(50, '-'); //Used on banner
 char board[8][8]; //Initialize (Multidimensional Array) Serves as the game board on screen.
 int totalscore=0; //If totalscore is 64 which is all the possible input spaces available, means the game has ended.
 
@@ -41,39 +41,39 @@ class SPower{
 public:
 	bool super1,super2,super3;
 	bool count1,count2,count3;
-	void init(){
+	void init(){ //Initialize
 		count1 = false, count2 = false,count3 = false;
 		super1 = false,super2 = false,super3 = false;
 	}
-	void S1(){
+	void S1(){ //Super power 1
 		if (!count1){
 			super1 = true;
-			count1=true;
+			count1=true; //ONE TIME ONLY
 		} else{
 			cout << "\a";
 		}
 	}
-	void S2(){
+	void S2(){ //Super power 2
 		if (!count2){
 			super2 = true;
-			count2=true;
+			count2=true; //ONE TIME ONLY
 		} else{
 			cout << "\a";
 		}
 	}
-	void S3(){
+	void S3(){ //Super power 3
 		if (!count3){
 			super3 = true;
-			count3=true;
+			count3=true; //ONE TIME ONLY
 		} else{
 			cout << "\a";
 		}	
 	}
-	void superthree(){
+	void superthree(){ 
 		if(super3){
 			srand(time(NULL));
 			int ran = rand()%8; //0-7
-			for(int i=0;i<8;i++){
+			for(int i=0;i<8;i++){ //Clear a random row
 				board[ran][i] = ' ';
 			}
 		}
@@ -82,7 +82,7 @@ public:
 		} else if (!player && super3) {
 			player=true;
 		}
-		
+		//Switch current player after executing super power 3
 	}
 	void powerdescription(){
 		if(super1){
@@ -94,10 +94,7 @@ public:
 			super3 = false;
 		}	
 	}
-};
-
-SPower X;
-SPower O;
+}X,O; //X and O class
 
 int main() //Main function
 {
@@ -109,6 +106,7 @@ void menu() //Start up screen
 {
 	X.init();
 	O.init();
+	//Initialize X and O in class
 	static string selections = "1. New Game\n2. Load a game\n3. Help\n4. Quit\n\n";
 	string menu_commands;
 	bool menu=true,super1=false,super2=false,super3=false;
@@ -139,18 +137,20 @@ void menu() //Start up screen
 			read.open("a.txt");
 			for(int Z=0;Z<8;Z++){
 				for(int Y=0;Y<8;Y++){
-					read.get(board[Z][Y]);
+					read.get(board[Z][Y]); //Load game board save game
 				}
 			}
 			char xx[7];
 			read >> xx;
 			player=xx[0]-48;
+			//Load current player
 			X.count1=xx[1]-48;
 			X.count2=xx[2]-48;
 			X.count3=xx[3]-48;
 			O.count1=xx[4]-48;
 			O.count2=xx[5]-48;
 			O.count3=xx[6]-48;
+			//Load super power usage history
 			read.close();
 			menu = false;
 			game();
