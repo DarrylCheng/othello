@@ -77,12 +77,6 @@ public:
 				board[ran][i] = ' ';
 			}
 		}
-		if(player && super3){
-			player=false;
-		} else if (!player && super3) {
-			player=true;
-		}
-		//Switch current player after executing super power 3
 	}
 	void powerdescription(){
 		if(super1){
@@ -290,6 +284,9 @@ void displayStatus() //Display player score and turn.
 	if (totalscore == 64){
 		done = true;
 	}
+	if (scoreO == 0 || scoreX == 0){
+		done = true;
+	}
 	cout << "\nScore:\t\tO = " << scoreO << "\tX = " << scoreX << endl;
 	if (!done){
 		if (player){ //If player is TRUE, then it is player X. Else player O.
@@ -314,14 +311,14 @@ void helpPage() //Game instructions
 	cls;
 	banner;
 	cout  << "In game instructions:\nTo input into the game board, type in the format of (A-H, 1-8)" 
-		  << " for example \n==> f 4\n\n"
-		  <<"Spaces that already contain a X or O cannot be inputted again,\nonce the game board is fully filled,"
-		  << " the game will display the winner and \nreturn to the game menu.\n";
+		  << " for example \n==> f 4\n";
 	cout  << "\nOther available commands in-game are:\n==> menu (Back to menu and resets the game)\n"
 		  <<"==> next player (Forfeit your turn)\n";
 	cout  << "==> save (Save the game and load it later)\n==> super1 (Place your move ANYWHERE)\n"
-		  << "==> super2 (Two consecutive turns)\n==> super3 (Clear a random row)\n";
-	cout  << "A *beep* sound will be made for every invalid input.\n\n";
+		  << "==> super2 (Two consecutive turns)\n==> super3 (Clear a random row)\n\n";
+	cout  << "Spaces that already contain a X or O cannot be inputted again, once the \ngame board is fully filled,"
+		  << " the game will display the winner and \nreturn to the game menu.\n"
+		  << "A *beep* sound will be made for every invalid input.\n\n";
 	system("pause"); //Pause 
 }
 
