@@ -14,7 +14,6 @@ Phone: 012-737-0538
 #include <iomanip> //setw
 #include <sstream> //istringstream
 #include <fstream>
-#include <ctime>
 using namespace std;
 
 #define cls (system("cls")) //Clear screen
@@ -30,9 +29,8 @@ void validateMove(int,int);
 void helpPage(); 
 void flipping(int,int,bool&);
 void displayStatus(); //Display score and current player
-void convertIndex(char&, int&);
-
-bool player = true, invalid=false,done=false; //True for player X, false for player Y. Default first player will be X.
+void convertIndex(char&, int&, bool&);
+bool player = true,done=false; //True for player X, false for player Y. Default first player will be X.
 string line(50, '-'); //Used on banner
 char board[8][8]; //Initialize (Multidimensional Array) Serves as the game board on screen.
 int totalscore=0; //If totalscore is 64 which is all the possible input spaces available, means the game has ended.
@@ -71,7 +69,7 @@ public:
 	}
 	void superthree(){ 
 		if(super3){
-			srand(time(NULL));
+			srand(totalscore);
 			int ran = rand()%8; //0-7
 			for(int i=0;i<8;i++){ //Clear a random row
 				board[ran][i] = ' ';
@@ -193,6 +191,7 @@ void game(){ //Draws the game board
 }
 
 void ingame_commands(){ //GET user input in game
+	bool invalid;
 	string game_commands;
 	X.powerdescription();
 	O.powerdescription();
@@ -255,7 +254,8 @@ void ingame_commands(){ //GET user input in game
 			char alpha;
 			int num;
 			seperate >> alpha >> num;
-			convertIndex(alpha,num);
+			invalid=false;
+			convertIndex(alpha,num,invalid);
 			if (!invalid){ 
 				validateMove(alpha, num);
 			} else {
@@ -267,7 +267,7 @@ void ingame_commands(){ //GET user input in game
 	}	
 }
 
-void displayStatus() //Display player score and turn.
+void displayStatus() //Display player score and player turn.
 {
 	int scoreX=0,scoreO=0;
 	for(int a=0;a<8;a++) {
@@ -322,9 +322,9 @@ void helpPage() //Game instructions
 	system("pause"); //Pause 
 }
 
-void convertIndex(char& alpha, int& num) //Convert them into array readable numbers, since user input (F,5) are (5,3) in terms of array positions.
+void convertIndex(char& alpha, int& num, bool& invalid) 
+//Convert into array readable numbers, since user input (F,5) are (5,3) in terms of array positions.
 {
-	invalid = false;
 	if (alpha>= 65 && alpha<=72){ //ASCII
 		alpha -= 65;
 	} else {
@@ -339,17 +339,17 @@ void convertIndex(char& alpha, int& num) //Convert them into array readable numb
 	}
 }
 
-void validateMove(int right, int left){
+void validateMove(int right, int left){ //Checks if move is valid
 	bool checkpiece = (board[left][right]=='X' || board[left][right]=='O');
 	bool ori = checkpiece,validmove=false;
 	if (X.super1||O.super1){
-		checkpiece = true;
+		checkpiece = true; //Place any where on board, hence ignoring "checkpiece".
 	} 
 	if (!checkpiece){
 		flipping(right, left, validmove);
-	} else if (X.super1||O.super1){
+	} else if (X.super1||O.super1){ //Place any where on board, hence ignoring "checkpiece".
 		flipping(right, left, validmove);
-		if(X.super1 || O.super1){
+		if(X.super1 || O.super1){ 
 			if(player){
 				SymbolX(left, right);
 				player = false;									
@@ -363,7 +363,7 @@ void validateMove(int right, int left){
 	}
 
 	if(validmove && !checkpiece){
-		if(X.super2 || O.super2){
+		if(X.super2 || O.super2){ //Two consecutive inputs
 			X.super2 = false;
 			O.super2 = false;
 			if(player){
@@ -391,7 +391,7 @@ void validateMove(int right, int left){
 	}
 }
 
-void flipping(const int RIGHT, const int LEFT, bool& validmove){
+void flipping(const int RIGHT, const int LEFT, bool& validmove){ //Flipping on markers
 	bool phase1=false,phase2=false;
 	const int LEFTINCRE[9] = {-1,-1,-1,0,0,0,1,1,1};
 	const int RIGHTINCRE[9] = {-1,0,1,-1,0,1,-1,0,1};
@@ -406,7 +406,7 @@ void flipping(const int RIGHT, const int LEFT, bool& validmove){
 
 	for(int i=0;i<9;i++){
 		phase1=false; phase2=false;
-		//Phase 1 start
+		//Phase 1 start, check if input neighbours are opposite. (EG. If input is X and its neighbour on the right is O, then proceed.)
 		if (player){
 			if(board[LEFT+leftvalue[i]][RIGHT+rightvalue[i]]=='O'){
 				phase1=true;
@@ -416,6 +416,8 @@ void flipping(const int RIGHT, const int LEFT, bool& validmove){
 				phase1=true;
 			}
 		}
+		//Phase 2 start, checks for the same marker across opponents marker. (EG. XOO'X' <---). 
+		//Ends if a same marker is not found or if the board is empty
 		if(phase1){
 			while(LEFT+leftvalue[i]>=0 && LEFT+leftvalue[i]<8 && RIGHT+rightvalue[i]>=0 && RIGHT+rightvalue[i]<8){
 				leftvalue[i]+=LEFTINCRE[i];
@@ -430,7 +432,7 @@ void flipping(const int RIGHT, const int LEFT, bool& validmove){
 			}
 		}
 		//phase2 end
-		//phase 3 start
+		//phase 3 start, replaces all the marker (in its respective direction).
 		if(phase1 && phase2){
 			validmove=true;
 			while(!(rightvalue[i]==RIGHTINCRE[i]) || !(leftvalue[i]==LEFTINCRE[i])){
