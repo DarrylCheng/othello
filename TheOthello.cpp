@@ -111,7 +111,8 @@ void menu() //Start up screen
 	while(menu){
 		cls; 
 		banner;
-		cout << "Choose the following selections\nType the number or the whole text\n\n";
+		cout << "Choose the following selections\nType the number or the whole text to proceed\n"
+			 << "Please read \"Help\" before playing!\n\n";
 		cout << selections;
 		arrow;
 		getline(cin, menu_commands);
@@ -311,14 +312,18 @@ void helpPage() //Game instructions
 {
 	cls;
 	banner;
-	cout  << "In game instructions:\nTo input into the game board, type in the format of (A-H, 1-8)" 
-		  << " for example \n==> f 4\n";
-	cout  << "\nOther available commands in-game are:\n==> menu (Back to menu and resets the game)\n"
-		  <<"==> next player (Forfeit your turn)\n";
-	cout  << "==> save (Save the game and load it later)\n==> super1 (Place your move ANYWHERE)\n"
-		  << "==> super2 (Two consecutive turns)\n==> super3 (Clear a random row)\n\n";
+	cout  << "In game instructions:\nTo input into the game board, type in the format of (A-H, 1-8).\n" 
+		  << "For example ==> f 4\n";
+	cout  << "\nOther available commands in-game are:\n"
+		  << "==> menu (Back to menu and resets the game)\n"
+		  << "==> next player (Forfeit your turn)\n"
+		  << "==> save (Save the game and load it later)\n"
+		  << "==> super1 (Place your move ANYWHERE)\n"
+		  << "==> super2 (Two consecutive turns)\n"
+		  << "==> super3 (Clear a random row)\n\n";
 	cout  << "Spaces that already contain a X or O cannot be inputted again, once the \ngame board is fully filled,"
-		  << " the game will display the winner and \nreturn to the game menu.\n"
+		  << " or no possible inputs are available, the game \nwill display the winner and return to the game menu.\n\n";
+	cout  << "A star '*' will be shown on the screen, to note the players where to input \ntheir markers.\n"
 		  << "A *beep* sound will be made for every invalid input.\n\n";
 	system("pause"); //Pause 
 }
