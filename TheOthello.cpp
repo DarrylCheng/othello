@@ -30,7 +30,8 @@ void helpPage();
 void flipping(int,int,bool&);
 void displayStatus(); //Display score and current player
 void convertIndex(char&, int&, bool&);
-bool player = true,done=false; //True for player X, false for player Y. Default first player will be X.
+void stars();
+bool player = true,done=false,star=false,canproceed; //True for player X, false for player Y. Default first player will be X.
 string line(50, '-'); //Used on banner
 char board[8][8]; //Initialize (Multidimensional Array) Serves as the game board on screen.
 int totalscore=0; //If totalscore is 64 which is all the possible input spaces available, means the game has ended.
@@ -167,6 +168,7 @@ void game(){ //Draws the game board
 	static string gameboard(" |---+---+---+---+---+---+---+---|\n");
 	cls; 
 	banner;
+	stars();
 	int num=8; //Vertical numbers beside the game board
 	for (int i=0;i<=7;i++) { //Draws the game board using for loop
 		cout << gameboard; //A string of text declared at line 36
@@ -281,11 +283,10 @@ void displayStatus() //Display player score and player turn.
 		}
 	}
 	totalscore = scoreO + scoreX;
-	if (totalscore == 64){ //If game is completely filled, game ends.
+	if (totalscore == 64 || !canproceed){ 
+		//1.If game is completely filled, game ends.
+		//2.In the event where game is not possible to continue, game ends.
 		done = true;
-	}
-	if (scoreO == 0 || scoreX == 0){ //In the event where game is not possible to continue
-		done = true; 
 	}
 	cout << "\nScore:\t\tO = " << scoreO << "\tX = " << scoreX << endl;
 	if (!done){
@@ -422,7 +423,7 @@ void flipping(const int RIGHT, const int LEFT, bool& validmove){ //Flipping on m
 			while(LEFT+leftvalue[i]>=0 && LEFT+leftvalue[i]<8 && RIGHT+rightvalue[i]>=0 && RIGHT+rightvalue[i]<8){
 				leftvalue[i]+=LEFTINCRE[i];
 				rightvalue[i]+=RIGHTINCRE[i];
-				if(board[LEFT+leftvalue[i]][RIGHT+rightvalue[i]]==' '){
+				if(board[LEFT+leftvalue[i]][RIGHT+rightvalue[i]]==' ' || board[LEFT+leftvalue[i]][RIGHT+rightvalue[i]]=='*'){
 					break;
 				}
 				if (board[LEFT+leftvalue[i]][RIGHT+rightvalue[i]]==sym){
@@ -433,7 +434,7 @@ void flipping(const int RIGHT, const int LEFT, bool& validmove){ //Flipping on m
 		}
 		//phase2 end
 		//phase 3 start, replaces all the marker (in its respective direction).
-		if(phase1 && phase2){
+		if(phase1 && phase2 && !star){
 			validmove=true;
 			while(!(rightvalue[i]==RIGHTINCRE[i]) || !(leftvalue[i]==LEFTINCRE[i])){
 				rightvalue[i] -= RIGHTINCRE[i];
@@ -444,7 +445,30 @@ void flipping(const int RIGHT, const int LEFT, bool& validmove){ //Flipping on m
 					SymbolO(LEFT+leftvalue[i],RIGHT+rightvalue[i]);
 				}
 			}
+		} else if (phase1 && phase2 && star){
+			validmove=true;
 		}
 		//phase 3 end
 	}
+}
+void stars(){
+	bool validshowstar;
+	canproceed=false; //In the event where player doesn't have any valid moves anymore.
+	star=true;
+	for(int i=0;i<8;i++){
+		for(int j=0;j<8;j++){
+			validshowstar=false;
+			if (!(board[i][j]== 'X' || board[i][j]== 'O')){ //Only checks for pieces with no markers
+				flipping(j,i,validshowstar); //Check for valid input
+				if(validshowstar){ //If move will be valid, place a star on that position
+					board[i][j]='*';
+					canproceed=true;
+				} else {
+					board[i][j]=' '; //If not valid, place a space to cover the previously placed star.
+				}
+			}
+		}
+	}
+	star=false;
+	return;
 }
