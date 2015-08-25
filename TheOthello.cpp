@@ -399,35 +399,33 @@ void validateMove(int right, int left){ //Checks if move is valid
 
 void flipping(const int RIGHT, const int LEFT, bool& validmove){ //Flipping on markers
 	bool phase1=false,phase2=false;
-	const int LEFTINCRE[9] = {-1,-1,-1,0,0,0,1,1,1};
-	const int RIGHTINCRE[9] = {-1,0,1,-1,0,1,-1,0,1};
-	int leftvalue[9] = {-1,-1,-1,0,0,0,1,1,1};
-	int rightvalue[9] = {-1,0,1,-1,0,1,-1,0,1};
+	const int LEFTINCRE[8] = {-1,-1,-1,0,0,1,1,1};
+	const int RIGHTINCRE[8] = {-1,0,1,-1,1,-1,0,1};
+	int leftvalue[8] = {-1,-1,-1,0,0,1,1,1};
+	int rightvalue[8] = {-1,0,1,-1,1,-1,0,1};
 	char sym;
-	
 	if (player)
 		sym='X';
 	else 
 		sym='O';
-
-	for(int i=0;i<9;i++){
+	for(int i=0;i<8;i++){
 		phase1=false; phase2=false;
 		//Phase 1 start, check if input neighbours are opposite. (EG. If input is X and its neighbour on the right is O, then proceed.)
-		if (player){
-			if(board[LEFT+leftvalue[i]][RIGHT+rightvalue[i]]=='O'){
-				phase1=true;
-			}
-		} else {
-			if(board[LEFT+leftvalue[i]][RIGHT+rightvalue[i]]=='X'){
-				phase1=true;
+		if(LEFT+leftvalue[i]>=0 && LEFT+leftvalue[i]<8 && RIGHT+rightvalue[i]>=0 && RIGHT+rightvalue[i]<8){
+			if (player){
+				if(board[LEFT+leftvalue[i]][RIGHT+rightvalue[i]]=='O'){
+					phase1=true;
+				}
+			} else {
+				if(board[LEFT+leftvalue[i]][RIGHT+rightvalue[i]]=='X'){
+					phase1=true;
+				}
 			}
 		}
 		//Phase 2 start, checks for the same marker across opponents marker. (EG. XOO'X' <---). 
 		//Ends if a same marker is not found or if the board is empty
 		if(phase1){
 			while(LEFT+leftvalue[i]>=0 && LEFT+leftvalue[i]<8 && RIGHT+rightvalue[i]>=0 && RIGHT+rightvalue[i]<8){
-				leftvalue[i]+=LEFTINCRE[i];
-				rightvalue[i]+=RIGHTINCRE[i];
 				if(board[LEFT+leftvalue[i]][RIGHT+rightvalue[i]]==' ' || board[LEFT+leftvalue[i]][RIGHT+rightvalue[i]]=='*'){
 					break;
 				}
@@ -435,6 +433,8 @@ void flipping(const int RIGHT, const int LEFT, bool& validmove){ //Flipping on m
 					phase2=true;
 					break;
 				}
+				leftvalue[i]+=LEFTINCRE[i];
+				rightvalue[i]+=RIGHTINCRE[i];
 			}
 		}
 		//phase2 end
