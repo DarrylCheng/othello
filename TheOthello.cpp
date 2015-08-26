@@ -31,7 +31,9 @@ void flipping(int,int,bool&);
 void displayStatus(); //Display score and current player
 void convertIndex(char&, int&, bool&);
 void stars();
-bool player = true,done=false,star=false,canproceed; //True for player X, false for player Y. Default first player will be X.
+bool player = true,done=false,star=false,canproceed; 
+//Player - True for player X, false for player Y. Default first player will be X.
+//canproceed - If no more valid move, return false and done=true.
 string line(50, '-'); //Used on banner
 char board[8][8]; //Initialize (Multidimensional Array) Serves as the game board on screen.
 int totalscore=0; //If totalscore is 64 which is all the possible input spaces available, means the game has ended.
@@ -167,6 +169,7 @@ void menu() //Start up screen
 
 void game(){ //Draws the game board
 	static string gameboard(" |---+---+---+---+---+---+---+---|\n");
+	redraw:
 	cls; 
 	banner;
 	stars();
@@ -182,13 +185,15 @@ void game(){ //Draws the game board
 	cout << gameboard; //A string of text declared at line 36
 	cout << "   a   b   c   d   e   f   g   h"; //Horizontal alphabets below the game board
 	displayStatus(); //Display score and player turn
-	//totalscore's value is from displayStatus()
+	if (totalscore !=64  && !canproceed){
+		goto redraw; //After passing turn to next player, redraws the map with the stars.
+	}
 	if(!done){
 		ingame_commands();
 	} else {
 		player = true; //Re initialize player back to true.
 		done = false;
-		totalscore=0;		
+		totalscore=0;	//totalscore's value is from displayStatus()	
 		menu();
 	}
 }
@@ -284,9 +289,23 @@ void displayStatus() //Display player score and player turn.
 		}
 	}
 	totalscore = scoreO + scoreX;
-	if (totalscore == 64 || !canproceed){ 
-		//1.If game is completely filled, game ends.
-		//2.In the event where game is not possible to continue, game ends.
+	if (totalscore !=64  && !canproceed){
+		//In the event where game is not possible to continue (with board not fully filled), automatically passes to next player.
+		char disp,disp2;
+		if(player){
+			disp = 'X', disp2 = 'O';
+			player=false;
+		}
+		else {
+			disp = 'O', disp2 = 'X';
+			player=true;
+		}		
+		cout << "\nNo more valid moves for player " << disp
+			 << ", passing to player " << disp2 << ".\n";
+		system("pause");
+		return;
+	} else if (totalscore == 64){ 
+		//If game is completely filled, game ends.
 		done = true;
 	}
 	cout << "\nScore:\t\tO = " << scoreO << "\tX = " << scoreX << endl;
@@ -355,7 +374,7 @@ void validateMove(int right, int left){ //Checks if move is valid
 		flipping(right, left, validmove);
 	} else if (X.super1||O.super1){ //Place any where on board, hence ignoring "checkpiece".
 		flipping(right, left, validmove);
-		if(X.super1 || O.super1){ 
+		if(X.super1 || O.super1){ //Places anywhere, doesn't even consider "validmove" in its condition.
 			if(player){
 				SymbolX(left, right);
 				player = false;									
@@ -410,7 +429,7 @@ void flipping(const int RIGHT, const int LEFT, bool& validmove){ //Flipping on m
 		sym='O';
 	for(int i=0;i<8;i++){
 		phase1=false; phase2=false;
-		//Phase 1 start, check if input neighbours are opposite. (EG. If input is X and its neighbour on the right is O, then proceed.)
+		//Phase 1 start, check if input neighbours are opposite. (EG. If input is X and its neighbour is O, then proceed.)
 		if(LEFT+leftvalue[i]>=0 && LEFT+leftvalue[i]<8 && RIGHT+rightvalue[i]>=0 && RIGHT+rightvalue[i]<8){
 			if (player){
 				if(board[LEFT+leftvalue[i]][RIGHT+rightvalue[i]]=='O'){
@@ -423,7 +442,7 @@ void flipping(const int RIGHT, const int LEFT, bool& validmove){ //Flipping on m
 			}
 		}
 		//Phase 2 start, checks for the same marker across opponents marker. (EG. XOO'X' <---). 
-		//Ends if a same marker is not found or if the board is empty
+		//False if a same marker is not found or if the board is empty
 		if(phase1){
 			while(LEFT+leftvalue[i]>=0 && LEFT+leftvalue[i]<8 && RIGHT+rightvalue[i]>=0 && RIGHT+rightvalue[i]<8){
 				if(board[LEFT+leftvalue[i]][RIGHT+rightvalue[i]]==' ' || board[LEFT+leftvalue[i]][RIGHT+rightvalue[i]]=='*'){
