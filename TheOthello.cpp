@@ -31,7 +31,8 @@ void flipping(int,int,bool&);
 void displayStatus(); //Display score and current player
 void convertIndex(char&, int&, bool&);
 void stars();
-bool player = true,done=false,star=false,canproceed; 
+void gamemsg();
+bool player = true,done=false,star=false,canproceed,wronginput=false; 
 //Player - True for player X, false for player Y. Default first player will be X.
 //canproceed - If no more valid move, return false and done=true.
 string line(50, '-'); //Used on banner
@@ -41,9 +42,10 @@ int totalscore=0; //If totalscore is 64 which is all the possible input spaces a
 class SPower{
 public:
 	bool super1,super2,super3;
-	bool count1,count2,count3;
+	bool count1,count2,count3,error1,error2,error3;
 	void init(){ //Initialize
 		count1 = false, count2 = false,count3 = false;
+		error1=false,error2=false,error3=false;
 		super1 = false,super2 = false,super3 = false;
 	}
 	void S1(){ //Super power 1
@@ -51,6 +53,7 @@ public:
 			super1 = true;
 			count1=true; //ONE TIME ONLY
 		} else{
+			error1 = true;
 			cout << "\a";
 		}
 	}
@@ -59,6 +62,7 @@ public:
 			super2 = true;
 			count2=true; //ONE TIME ONLY
 		} else{
+			error2 = true;
 			cout << "\a";
 		}
 	}
@@ -67,6 +71,7 @@ public:
 			super3 = true;
 			count3=true; //ONE TIME ONLY
 		} else{
+			error3 = true;
 			cout << "\a";
 		}	
 	}
@@ -81,11 +86,11 @@ public:
 	}
 	void powerdescription(){
 		if(super1){
-			cout << "   (Super power 1! You can place ANYWHERE you like!)";
+			cout << "Super power 1! You can place ANYWHERE you like!";
 		} else if (super2){
-			cout << "   (Super power 2! Two consequtive inputs!)";
+			cout << "Super power 2! Two consequtive inputs!";
 		} else if (super3) {
-			cout << "   (Super power 3! Cleared a random row :P)";
+			cout << "Super power 3! Cleared a random row :P";
 			super3 = false;
 		}	
 	}
@@ -104,7 +109,7 @@ void menu() //Start up screen
 	//Initialize X and O in class
 	static string selections = "1. New Game\n2. Load a game\n3. Help\n4. Quit\n\n";
 	string menu_commands;
-	bool menu=true,super1=false,super2=false,super3=false;
+	bool menu=true;
 	for (int i=0;i<=7;i++){ //For loop used to reset/re-initialize all array
 		for(int j=0;j<=7;j++){
 			board[i][j] = ' ';
@@ -180,6 +185,13 @@ void game(){ //Draws the game board
 		for(int j=0;j<=7;j++){
 			cout << " " << board[i][j] << " |";
 		}
+		if(num == 5){
+			cout << "\tPlaces marked with * are";
+		} else if (num==4){
+			cout << "\tpossible valid inputs.";
+		} else if (num==2){
+			cout << "\tCoded by Darryl Cheng";
+		}
 		cout << endl;
 	}
 	cout << gameboard; //A string of text declared at line 36
@@ -201,8 +213,6 @@ void game(){ //Draws the game board
 void ingame_commands(){ //GET user input in game
 	bool invalid;
 	string game_commands;
-	X.powerdescription();
-	O.powerdescription();
 	cout << endl;
 	arrow;
 	if (getline(cin, game_commands)){
@@ -257,7 +267,10 @@ void ingame_commands(){ //GET user input in game
 				O.superthree();
 			}
 			game();
-		} else {
+		} else if (game_commands == "HELP"){
+			helpPage();
+			game();
+		}else {
 			istringstream seperate(game_commands); //Seperate input into char and int 
 			char alpha;
 			int num;
@@ -267,6 +280,7 @@ void ingame_commands(){ //GET user input in game
 			if (!invalid){ 
 				validateMove(alpha, num);
 			} else {
+				wronginput=true;
 				cout << "\a"; //Beep sound indicates invalid input
 			}
 			game();
@@ -289,22 +303,7 @@ void displayStatus() //Display player score and player turn.
 		}
 	}
 	totalscore = scoreO + scoreX;
-	if (totalscore !=64  && !canproceed){
-		//In the event where game is not possible to continue (with board not fully filled), automatically passes to next player.
-		char disp,disp2;
-		if(player){
-			disp = 'X', disp2 = 'O';
-			player=false;
-		}
-		else {
-			disp = 'O', disp2 = 'X';
-			player=true;
-		}		
-		cout << "\nNo more valid moves for player " << disp
-			 << ", passing to player " << disp2 << ".\n";
-		system("pause");
-		return;
-	} else if (totalscore == 64){ 
+	if (totalscore == 64){ 
 		//If game is completely filled, game ends.
 		done = true;
 	}
@@ -315,7 +314,11 @@ void displayStatus() //Display player score and player turn.
 		} else
 			cout << "Current player: O";
 	}	
-	else {
+	cout << endl << "Game message: ";
+	if (X.super1 || X.super2 || X.super3 || O.super1 || O.super2 || O.super3){
+		X.powerdescription();
+		O.powerdescription();
+	} else if (done){
 		if (scoreO < scoreX){
 			cout << "Winner is player X!\n";
 		} else if (scoreO == scoreX){
@@ -324,6 +327,29 @@ void displayStatus() //Display player score and player turn.
 			cout << "Winner is player O!\n";
 		}
 		system("pause");
+	} else if (wronginput){
+		cout << "Invalid input! Valid places are marked with *";
+		wronginput=false;
+	} else if (X.error1 || O.error1 || X.error2 || O.error2 || X.error3 || O.error3){
+		cout << "Oops, each super power can only be used once!";
+		X.error1 = false,X.error2 = false,X.error3 = false;
+		O.error1 = false,O.error2 = false,O.error3 = false;
+	} else if (totalscore !=64  && !canproceed){
+		//In the event where game is not possible to continue (with board not fully filled), automatically passes to next player.
+		char disp,disp2;
+		if(player){
+			disp = 'X', disp2 = 'O';
+			player=false;
+		}
+		else {
+			disp = 'O', disp2 = 'X';
+			player=true;
+		}		
+		cout << "No more valid moves for player " << disp
+			 << ", turn passed to player " << disp2 << "!\n";
+		system("pause");
+	} else {
+		cout << "Type help for a list of commands!";
 	}
 }
 
@@ -384,6 +410,7 @@ void validateMove(int right, int left){ //Checks if move is valid
 			}
 		} 
 	} else {
+		wronginput=true;
 		cout << "\a";
 	}
 
@@ -411,6 +438,7 @@ void validateMove(int right, int left){ //Checks if move is valid
 			X.super1 = false;
 			O.super1 = false;
 		} else {
+			wronginput=true;
 			cout << "\a";
 		}
 	}
@@ -475,6 +503,7 @@ void flipping(const int RIGHT, const int LEFT, bool& validmove){ //Flipping on m
 		//phase 3 end
 	}
 }
+
 void stars(){
 	bool validshowstar;
 	canproceed=false; //In the event where player doesn't have any valid moves anymore.
