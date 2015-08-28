@@ -28,11 +28,10 @@ void ingame_commands();
 void validateMove(int,int);
 void helpPage(); 
 void flipping(int,int,bool&);
-void displayStatus(); //Display score and current player
+void calcStatus(int&, int&);
 void convertIndex(char&, int&, bool&);
 void stars();
-void gamemsg();
-bool player = true,done=false,star=false,canproceed,wronginput=false; 
+bool player = true,done=false,star=false,description,canproceed,wronginput=false; 
 //Player - True for player X, false for player Y. Default first player will be X.
 //canproceed - If no more valid move, return false and done=true.
 string line(50, '-'); //Used on banner
@@ -86,12 +85,30 @@ public:
 	}
 	void powerdescription(){
 		if(super1){
-			cout << "Super power 1! You can place ANYWHERE you like!";
+			if(description){
+				cout << "\tSuper power 1!";
+				description=false;
+			}else{
+				cout << "\tYou can place ANYWHERE you like!";
+				description=true;
+			}
 		} else if (super2){
-			cout << "Super power 2! Two consequtive inputs!";
+			if(description){
+				cout << "\tSuper power 2!";
+				description=false;
+			}else{
+				cout << "\tTwo consequtive inputs!";
+				description=true;
+			}
 		} else if (super3) {
-			cout << "Super power 3! Cleared a random row :P";
-			super3 = false;
+			if(description){
+				cout << "\tSuper power 3!";
+				description=false;
+			}else{
+				cout << "\tCleared a random row :P";
+				description=true;
+				super3 = false;
+			}
 		}	
 	}
 }X,O; //X and O class
@@ -172,12 +189,37 @@ void menu() //Start up screen
 	}
 }
 
+void calcStatus(int& scoreX, int& scoreO) //Display player score and player turn.
+{
+	for(int a=0;a<8;a++) {
+		for(int b=0;b<8;b++) {
+			if (board[a][b] == 'O'){ //Calculates how many array are equal to 1 (Which is Symbol O)
+				scoreO++;
+			}
+			else if (board[a][b] == 'X'){//Calculates how many array are equal to 2 (Which is Symbol X)
+				scoreX++;
+			} 
+		}
+	}
+	totalscore = scoreO + scoreX;
+	if (totalscore == 64){ 
+		//If game is completely filled, game ends.
+		done = true;
+	}
+}
+
 void game(){ //Draws the game board
-	static string gameboard(" |---+---+---+---+---+---+---+---|\n");
+	char disp,disp2;
+	bool showstat=false;
+	int counter=0; //If BOTH players have no turns anymore.
 	redraw:
+	int scoreX=0,scoreO=0;
+	calcStatus(scoreX, scoreO);
+	description=true;
 	cls; 
 	banner;
 	stars();
+	static string gameboard(" |---+---+---+---+---+---+---+---|\n");
 	int num=8; //Vertical numbers beside the game board
 	for (int i=0;i<=7;i++) { //Draws the game board using for loop
 		cout << gameboard; //A string of text declared at line 36
@@ -185,19 +227,81 @@ void game(){ //Draws the game board
 		for(int j=0;j<=7;j++){
 			cout << " " << board[i][j] << " |";
 		}
-		if(num == 5){
-			cout << "\tPlaces marked with * are";
-		} else if (num==4){
-			cout << "\tpossible valid inputs.";
-		} else if (num==2){
-			cout << "\tCoded by Darryl Cheng";
+		if (done){
+			if(num==5){
+				if (scoreO < scoreX){
+					cout << "\tWinner is player X!";
+				} else if (scoreO == scoreX){
+					cout << "\tIt is a draw!";
+				} else{
+					cout << "\tWinner is player O!";
+				}
+			} else if (num==4){
+				cout << "\tCongratulations!";
+			}
+		} else if (wronginput){
+			if(num==5){
+				cout << "\t\aInvalid input!";
+			} else if (num==4){
+				cout << "\tValid places are marked with *";
+				wronginput=false;
+			}
+		} else if (X.super1 || X.super2 || X.super3 || O.super1 || O.super2 || O.super3){
+			if(num==5){
+				X.powerdescription(),O.powerdescription();
+			} else if (num==4){
+				X.powerdescription(),O.powerdescription();
+			}
+		} else if (X.error1 || O.error1 || X.error2 || O.error2 || X.error3 || O.error3){
+			if(num==5){
+				cout << "\tOops, each super power";
+			} else if (num==4){
+				cout << "\tcan only be used once!";
+				X.error1 = false,X.error2 = false,X.error3 = false;
+				O.error1 = false,O.error2 = false,O.error3 = false;
+			}
+		}  else if (showstat){	
+			if(num==5){
+				cout << "\t\aNo more valid moves for player " << disp;
+			} else if (num==4){
+				cout << "\tturn passed to player " << disp2 << "!";
+				showstat=false;
+			}
+		} else {
+			if(num == 5){
+				cout << "\tPlaces marked with * are";
+			} else if (num==4){
+				cout << "\tpossible valid inputs.";
+			} 
+			if (num==1){
+				cout << "\tType help for commands";
+			}
 		}
 		cout << endl;
 	}
 	cout << gameboard; //A string of text declared at line 36
 	cout << "   a   b   c   d   e   f   g   h"; //Horizontal alphabets below the game board
-	displayStatus(); //Display score and player turn
-	if (totalscore !=64  && !canproceed){
+	cout << "\nScore:\t\tO = " << scoreO << "\tX = " << scoreX << endl;
+	if (!done){
+		if (player){ //If player is TRUE, then it is player X. Else player O.
+			cout << "Current player: X";
+		} else
+			cout << "Current player: O";
+	}	
+	if (totalscore !=64  && !canproceed && counter!=2){ 
+		//In the event where game is not possible to continue (with board not fully filled), automatically passes to next player.
+		if(player){
+				disp = 'X', disp2 = 'O';
+				player=false;
+			}
+			else {
+				disp = 'O', disp2 = 'X';
+				player=true;
+		}	
+		showstat = true;
+		counter++;
+		if(counter==2)
+			done=true;
 		goto redraw; //After passing turn to next player, redraws the map with the stars.
 	}
 	if(!done){
@@ -205,11 +309,11 @@ void game(){ //Draws the game board
 	} else {
 		player = true; //Re initialize player back to true.
 		done = false;
-		totalscore=0;	//totalscore's value is from displayStatus()	
+		totalscore=0;	//totalscore's value is from displayStatus()
+		system("pause");	
 		menu();
 	}
 }
-
 void ingame_commands(){ //GET user input in game
 	bool invalid;
 	string game_commands;
@@ -281,76 +385,11 @@ void ingame_commands(){ //GET user input in game
 				validateMove(alpha, num);
 			} else {
 				wronginput=true;
-				cout << "\a"; //Beep sound indicates invalid input
 			}
 			game();
 			//game() function are called to re-draw the game board with the necessary changes by user input	
 		}
 	}	
-}
-
-void displayStatus() //Display player score and player turn.
-{
-	int scoreX=0,scoreO=0;
-	for(int a=0;a<8;a++) {
-		for(int b=0;b<8;b++) {
-			if (board[a][b] == 'O'){ //Calculates how many array are equal to 1 (Which is Symbol O)
-				scoreO++;
-			}
-			else if (board[a][b] == 'X'){//Calculates how many array are equal to 2 (Which is Symbol X)
-				scoreX++;
-			} 
-		}
-	}
-	totalscore = scoreO + scoreX;
-	if (totalscore == 64){ 
-		//If game is completely filled, game ends.
-		done = true;
-	}
-	cout << "\nScore:\t\tO = " << scoreO << "\tX = " << scoreX << endl;
-	if (!done){
-		if (player){ //If player is TRUE, then it is player X. Else player O.
-			cout << "Current player: X";
-		} else
-			cout << "Current player: O";
-	}	
-	cout << endl << "Game message: ";
-	if (X.super1 || X.super2 || X.super3 || O.super1 || O.super2 || O.super3){
-		X.powerdescription();
-		O.powerdescription();
-	} else if (done){
-		if (scoreO < scoreX){
-			cout << "Winner is player X!\n";
-		} else if (scoreO == scoreX){
-			cout << "It is a draw!\n";
-		} else{
-			cout << "Winner is player O!\n";
-		}
-		system("pause");
-	} else if (wronginput){
-		cout << "Invalid input! Valid places are marked with *";
-		wronginput=false;
-	} else if (X.error1 || O.error1 || X.error2 || O.error2 || X.error3 || O.error3){
-		cout << "Oops, each super power can only be used once!";
-		X.error1 = false,X.error2 = false,X.error3 = false;
-		O.error1 = false,O.error2 = false,O.error3 = false;
-	} else if (totalscore !=64  && !canproceed){
-		//In the event where game is not possible to continue (with board not fully filled), automatically passes to next player.
-		char disp,disp2;
-		if(player){
-			disp = 'X', disp2 = 'O';
-			player=false;
-		}
-		else {
-			disp = 'O', disp2 = 'X';
-			player=true;
-		}		
-		cout << "No more valid moves for player " << disp
-			 << ", turn passed to player " << disp2 << "!\n";
-		system("pause");
-	} else {
-		cout << "Type help for a list of commands!";
-	}
 }
 
 void helpPage() //Game instructions
@@ -369,6 +408,7 @@ void helpPage() //Game instructions
 	cout  << "Spaces that already contain a X or O cannot be inputted again, once the \ngame board is fully filled,"
 		  << " or no possible inputs are available, the game \nwill display the winner and return to the game menu.\n\n";
 	cout  << "A star '*' will be shown on the screen, to note the players where to input \ntheir markers.\n"
+		  << "If neither players have any moves left, the game will end and display its winner.\n"
 		  << "A *beep* sound will be made for every invalid input.\n\n";
 	system("pause"); //Pause 
 }
@@ -411,7 +451,6 @@ void validateMove(int right, int left){ //Checks if move is valid
 		} 
 	} else {
 		wronginput=true;
-		cout << "\a";
 	}
 
 	if(validmove && !checkpiece){
@@ -439,7 +478,6 @@ void validateMove(int right, int left){ //Checks if move is valid
 			O.super1 = false;
 		} else {
 			wronginput=true;
-			cout << "\a";
 		}
 	}
 }
