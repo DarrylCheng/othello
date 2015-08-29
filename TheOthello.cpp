@@ -30,8 +30,8 @@ void helpPage();
 void flipping(int,int,bool&);
 void calcStatus(int&, int&);
 void convertIndex(char&, int&, bool&);
-void stars();
-bool player = true,done=false,star=false,description,canproceed,wronginput=false; 
+void stars();//Stars on board to show valid inputs
+bool player = true,done=false,star=false,passed=false,description,saved=false,canproceed,wronginput=false; 
 //Player - True for player X, false for player Y. Default first player will be X.
 //canproceed - If no more valid move, return false and done=true.
 string line(50, '-'); //Used on banner
@@ -153,6 +153,11 @@ void menu() //Start up screen
 		else if (menu_commands == "2" || menu_commands == "LOAD A GAME"){
 			ifstream read;
 			read.open("a.txt");
+			if(!read.is_open()){
+				cout << "==> Save game not found!\n==> ";
+				system("pause");
+				continue;
+			}
 			for(int Z=0;Z<8;Z++){
 				for(int Y=0;Y<8;Y++){
 					read.get(board[Z][Y]); //Load game board save game
@@ -246,6 +251,12 @@ void game(){ //Draws the game board
 				cout << "\tValid places are marked with *";
 				wronginput=false;
 			}
+		} else if (passed){
+			if(num==5){
+				cout << "\tPassed to next player!";
+			} else if (num==4){
+				passed=false;
+			}
 		} else if (X.super1 || X.super2 || X.super3 || O.super1 || O.super2 || O.super3){
 			if(num==5){
 				X.powerdescription(),O.powerdescription();
@@ -260,7 +271,13 @@ void game(){ //Draws the game board
 				X.error1 = false,X.error2 = false,X.error3 = false;
 				O.error1 = false,O.error2 = false,O.error3 = false;
 			}
-		}  else if (showstat){	
+		} else if (saved) {
+			if(num==5){
+				cout << "\tGame saved!" << disp;
+			} else if (num==4){
+				saved=false;
+			}
+		} else if (showstat){	
 			if(num==5){
 				cout << "\t\aNo more valid moves for player " << disp;
 			} else if (num==4){
@@ -274,7 +291,7 @@ void game(){ //Draws the game board
 				cout << "\tpossible valid inputs.";
 			} 
 			if (num==1){
-				cout << "\tType help for commands";
+				cout << "\tType help for list of commands";
 			}
 		}
 		cout << endl;
@@ -334,6 +351,7 @@ void ingame_commands(){ //GET user input in game
 			} else {
 				player = true; //True for player X.
 			}
+			passed=true;
 			game();
 		} 
 		else if (game_commands == "SAVE"){
@@ -347,6 +365,7 @@ void ingame_commands(){ //GET user input in game
 			savegame << player;
 			savegame << X.count1 << X.count2 << X.count3 << O.count1 << O.count2 << O.count3;
 			savegame.close();
+			saved=true;
 			game();
 		} else if (game_commands == "SUPER1"){
 			if(player){
@@ -408,7 +427,7 @@ void helpPage() //Game instructions
 	cout  << "Spaces that already contain a X or O cannot be inputted again, once the \ngame board is fully filled,"
 		  << " or no possible inputs are available, the game \nwill display the winner and return to the game menu.\n\n";
 	cout  << "A star '*' will be shown on the screen, to note the players where to input \ntheir markers.\n"
-		  << "If neither players have any moves left, the game will end and display its winner.\n"
+		  << "If neither players have any moves left, the game will end.\n"
 		  << "A *beep* sound will be made for every invalid input.\n\n";
 	system("pause"); //Pause 
 }
