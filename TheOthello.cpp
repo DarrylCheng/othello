@@ -147,6 +147,7 @@ void menu() //Start up screen
 		if (menu_commands == "1" || menu_commands == "NEW GAME"){	
 			SymbolX(4,3), SymbolO(4,4), SymbolO(3,3), SymbolX(3,4); //Initialize board
 			done = false;
+			player=true;//Re initialize player back to true.
 			menu = false;
 			game();
 		}
@@ -342,7 +343,6 @@ void ingame_commands(){ //GET user input in game
 			//convert user input into capital letters, so program only have to check for capitalized version of each command.
 		}
 		if (game_commands == "MENU"){
-			player = true; //Re initialize player back to true.
 			menu(); 
 		}
 		else if (game_commands == "NEXT PLAYER"){
@@ -364,6 +364,7 @@ void ingame_commands(){ //GET user input in game
 			}
 			savegame << player;
 			savegame << X.count1 << X.count2 << X.count3 << O.count1 << O.count2 << O.count3;
+			savegame << " \n\n\nThis is intended as a READ-ONLY file, DO NOT EDIT.";
 			savegame.close();
 			saved=true;
 			game();
