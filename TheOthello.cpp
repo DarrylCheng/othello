@@ -317,8 +317,8 @@ void game(){ //Draws the game board
 				player=true;
 		}	
 		showstat = true;
-		counter++;
-		if(counter==2)
+		counter++; 
+		if(counter==2) //If BOTH players have no turns left, game ends.
 			done=true;
 		goto redraw; //After passing turn to next player, redraws the map with the stars.
 	}
