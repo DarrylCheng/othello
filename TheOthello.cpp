@@ -14,6 +14,7 @@ Phone: 012-737-0538
 #include <iomanip> //setw
 #include <sstream> //istringstream
 #include <fstream> //Save and load file
+#include <ctime>
 using namespace std;
 
 #define cls (system("cls")) //Clear screen
@@ -41,7 +42,7 @@ int totalscore=0; //If totalscore is 64 which is all the possible input spaces a
 class SPower{
 public:
 	bool super1,super2,super3;
-	bool count1,count2,count3,error1,error2,error3;
+	bool count1,count2,count3,error1,error2,error3,rands;
 	void init(){ //Initialize
 		count1 = false, count2 = false,count3 = false;
 		error1=false,error2=false,error3=false;
@@ -74,13 +75,28 @@ public:
 			cout << "\a";
 		}	
 	}
+	void supertwo(){
+		if(super2){
+			srand(time(NULL));
+			int ran = rand()%8;
+			for(int i=0;i<8;i++){ //Clear a random row
+				if(ran+i <= 7)
+					if(player)
+						board[ran+i][i] = 'X';
+					else
+						board[ran+i][i] = 'O';
+			}
+			switchplayer();
+		}
+	}
 	void superthree(){ 
 		if(super3){
-			srand(totalscore);
+			srand(time(NULL));
 			int ran = rand()%8; //0-7
 			for(int i=0;i<8;i++){ //Clear a random row
 				board[ran][i] = ' ';
 			}
+			switchplayer();
 		}
 	}
 	void powerdescription(){
@@ -97,7 +113,8 @@ public:
 				cout << "\tSuper power 2!";
 				description=false;
 			}else{
-				cout << "\tTwo consequtive inputs!";
+				cout << "\tRandom diagonal line generated!";
+				super2=false;
 				description=true;
 			}
 		} else if (super3) {
@@ -111,6 +128,13 @@ public:
 			}
 		}	
 	}
+	private:
+		void switchplayer(){
+				if(player)
+					player = false;
+				else
+					player = true;
+			}
 }X,O; //X and O class
 
 int main() //Main function
@@ -378,8 +402,10 @@ void ingame_commands(){ //GET user input in game
 		} else if (game_commands == "SUPER2"){
 			if(player){
 				X.S2();
+				X.supertwo();
 			} else {
 				O.S2();
+				O.supertwo();
 			}
 			game();
 		} else if (game_commands == "SUPER3"){
@@ -422,14 +448,15 @@ void helpPage() //Game instructions
 		  << "==> menu (Back to menu and resets the game)\n"
 		  << "==> next player (Forfeit your turn)\n"
 		  << "==> save (Save the game and load it later)\n"
-		  << "==> super1 (Place your move ANYWHERE)\n"
-		  << "==> super2 (Two consecutive turns)\n"
+		  << "==> super1 (Place your move ANYWHERE, creates a big X.)\n"
+		  << "==> super2 (Generates a diagonal line starting at a random row.)\n"
 		  << "==> super3 (Clear a random row)\n\n";
-	cout  << "Spaces that already contain a X or O cannot be inputted again, once the \ngame board is fully filled,"
-		  << " or no possible inputs are available, the game \nwill display the winner and return to the game menu.\n\n";
-	cout  << "A star '*' will be shown on the screen, to note the players where to input \ntheir markers.\n"
-		  << "If neither players have any moves left, the game will end.\n"
-		  << "A *beep* sound will be made for every invalid input.\n\n";
+	cout  << "-Spaces that already contain a X or O cannot be inputted again, once the \n game board is fully filled,"
+		  << " the game will display the winner and \n return to the game menu.\n"
+		  << "-Super powers can only be used once!\n";
+	cout  << "-A star '*' will be shown on the screen, to note the players where to input \n their markers.\n"
+		  << "-If neither players have any moves left, the game will end.\n"
+		  << "-A *beep* sound will be made for every invalid input.\n\n";
 	system("pause"); //Pause 
 }
 
@@ -458,39 +485,37 @@ void validateMove(int right, int left){ //Checks if move is valid
 	} 
 	if (!checkpiece){
 		flipping(right, left, validmove);
-	} else if (X.super1||O.super1){ //Place any where on board, hence ignoring "checkpiece".
-		flipping(right, left, validmove);
-		if(X.super1 || O.super1){ //Places anywhere, doesn't even consider "validmove" in its condition.
-			if(player){
-				SymbolX(left, right);
-				player = false;									
-			} else{ //O
-				SymbolO(left, right);
-				player = true;
+	} 
+	else if (X.super1||O.super1){ //Place any where on board, hence ignoring "checkpiece".
+		static int leftz[5] = {0,-1,-1,1,1};
+		static int rightz[5] = {0,-1,1,1,-1};
+		for(int fivetimes=0;fivetimes<5;fivetimes++){
+			if(right+rightz[fivetimes]>=0 && right+rightz[fivetimes]<8 && left+leftz[fivetimes]>=0 && left+leftz[fivetimes]<8){
+				flipping(right+rightz[fivetimes], left+leftz[fivetimes], validmove);
+				if(player){
+					SymbolX(left+leftz[fivetimes],right+rightz[fivetimes]);								
+				} else{ //O
+					SymbolO(left+leftz[fivetimes],right+rightz[fivetimes]);
+				}
 			}
-		} 
-	} else {
+		}
+		if(player)
+			player=false;
+		else
+			player=true;
+	} 
+	else {
 		wronginput=true;
 	}
 
 	if(validmove && !checkpiece){
-		if(X.super2 || O.super2){ //Two consecutive inputs
-			X.super2 = false;
-			O.super2 = false;
-			if(player){
-				SymbolX(left, right);
-			} else{ //O
-				SymbolO(left, right);
-			} 
-		} else {
-			if (player){ //X
-				SymbolX(left, right);
-				player = false;									
-			} 
-			else{ //O
-				SymbolO(left, right);
-				player = true;
-			}
+		if (player){ //X
+			SymbolX(left, right);
+			player = false;									
+		} 
+		else{ //O
+			SymbolO(left, right);
+			player = true;
 		}
 	} else {
 		if (X.super1 || O.super1){
