@@ -42,7 +42,7 @@ int totalscore=0; //If totalscore is 64 which is all the possible input spaces a
 class SPower{
 public:
 	bool super1,super2,super3;
-	bool count1,count2,count3,error1,error2,error3,rands;
+	bool count1,count2,count3,error1,error2,error3;
 	void init(){ //Initialize
 		count1 = false, count2 = false,count3 = false;
 		error1=false,error2=false,error3=false;
